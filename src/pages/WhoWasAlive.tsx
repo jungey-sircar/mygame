@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search, Trophy, Shuffle, Users, Filter } from "lucide-react";
@@ -26,10 +26,49 @@ const categories = ["All", "Writers", "Scientists", "Politicians", "Artists", "P
 
 const formatYear = (y: number) => (y < 0 ? `${Math.abs(y)} BC` : `${y} AD`);
 
+const buildWikimediaFilePathUrl = (originalUrl: string): string | null => {
+  try {
+    const parsed = new URL(originalUrl);
+    if (!parsed.hostname.includes("wikimedia.org") && !parsed.hostname.includes("wikipedia.org")) {
+      return null;
+    }
+
+    const rawFilename = decodeURIComponent(parsed.pathname.split("/").pop() || "");
+    if (!rawFilename) return null;
+
+    const filename = rawFilename.replace(/^\d+px-/, "");
+    if (!filename) return null;
+
+    return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
+  } catch {
+    return null;
+  }
+};
+
+const getImageUrl = (originalUrl: string): string => {
+  // Weserv expects the remote URL without protocol in the `url` query param.
+  if (originalUrl.includes("wikimedia.org") || originalUrl.includes("wikipedia.org")) {
+    const normalized = originalUrl.replace(/^https?:\/\//, "");
+    return `https://images.weserv.nl/?url=${encodeURIComponent(normalized)}&output=webp&q=80`;
+  }
+  return originalUrl;
+};
+
+const normalizeSearch = (value: string) => value.trim().toLowerCase();
+
+const getWikipediaUrl = (name: string): string => {
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(name)}`;
+};
+
+const BROTHERS_GRIMM_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Grimm.jpg/330px-Grimm.jpg";
+
 const WhoWasAlive = () => {
   const [figures, setFigures] = useState<Figure[]>([]);
   const [year, setYear] = useState(1800);
   const [yearInput, setYearInput] = useState("1800");
+  const [maxYear, setMaxYear] = useState(() => new Date().getFullYear());
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [mode, setMode] = useState<"explore" | "challenge">("explore");
@@ -41,9 +80,19 @@ const WhoWasAlive = () => {
   const [challengeScore, setChallengeScore] = useState(0);
   const [challengeRound, setChallengeRound] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
+  const wikipediaImageCache = useRef<Record<string, string>>({});
 
   useEffect(() => {
     fetchFigures();
+  }, []);
+
+  useEffect(() => {
+    const updateMaxYear = () => setMaxYear(new Date().getFullYear());
+    updateMaxYear();
+
+    // Keep the limit fresh if the app stays open across New Year.
+    const intervalId = window.setInterval(updateMaxYear, 60 * 60 * 1000);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const fetchFigures = async () => {
@@ -52,7 +101,33 @@ const WhoWasAlive = () => {
         body: null,
         method: "GET",
       });
-      if (data) setFigures(data);
+      if (data) {
+        const nextFigures: Figure[] = (Array.isArray(data) ? data : []).map((f: Figure) => {
+          if (normalizeSearch(f.name).includes("brothers grimm")) {
+            return {
+              ...f,
+              image: BROTHERS_GRIMM_IMAGE_URL,
+            };
+          }
+
+          return f;
+        });
+        const hasElon = nextFigures.some((f) => normalizeSearch(f.name) === "elon musk");
+
+        if (!hasElon) {
+          nextFigures.push({
+            id: 10001,
+            name: "Elon Musk",
+            birth_year: 1971,
+            death_year: maxYear + 100,
+            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Elon_Musk_Royal_Society_%28crop1%29.jpg/220px-Elon_Musk_Royal_Society_%28crop1%29.jpg",
+            description: "Entrepreneur and technology business leader",
+            category: "Inventors",
+          });
+        }
+
+        setFigures(nextFigures);
+      }
     } catch (err) {
       console.error("Failed to fetch figures:", err);
     } finally {
@@ -77,17 +152,60 @@ const WhoWasAlive = () => {
     return aliveFigures.reduce((y2, f) => (year - f.birth_year < year - y2.birth_year ? f : y2));
   }, [aliveFigures, year]);
 
+  const searchResults = useMemo(() => {
+    const q = normalizeSearch(searchQuery);
+    if (!q) return [];
+
+    return figures
+      .filter((f) => activeCategory === "All" || f.category === activeCategory)
+      .filter((f) => normalizeSearch(f.name).includes(q))
+      .sort((a, b) => a.birth_year - b.birth_year);
+  }, [figures, activeCategory, searchQuery]);
+
+  const displayedFigures = searchQuery ? searchResults : aliveFigures;
+
   const handleYearChange = useCallback((val: string) => {
     setYearInput(val);
     const n = parseInt(val);
-    if (!isNaN(n) && n >= -1500 && n <= 2025) {
+    if (!isNaN(n) && n >= -1500 && n <= maxYear) {
       setYear(n);
     }
-  }, []);
+  }, [maxYear]);
 
   const handleSliderChange = useCallback((val: number[]) => {
     setYear(val[0]);
     setYearInput(String(val[0]));
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    setSearchQuery(normalizeSearch(searchInput));
+  }, [searchInput]);
+
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+    setSearchQuery("");
+  }, []);
+
+  const fetchWikipediaThumbnail = useCallback(async (name: string) => {
+    const cached = wikipediaImageCache.current[name];
+    if (cached) return cached;
+
+    try {
+      const title = encodeURIComponent(name.replace(/\s+/g, "_"));
+      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const src = data?.thumbnail?.source as string | undefined;
+      if (src) {
+        wikipediaImageCache.current[name] = src;
+        return src;
+      }
+    } catch (err) {
+      console.error(`Failed to fetch Wikipedia thumbnail for ${name}:`, err);
+    }
+
+    return null;
   }, []);
 
   // Challenge mode
@@ -140,6 +258,41 @@ const WhoWasAlive = () => {
     setTotalScore((t) => t + score);
     setChallengeRevealed(true);
   };
+
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>, originalUrl: string, figureName: string) => {
+      const img = e.currentTarget;
+      const stage = Number(img.dataset.fallbackStage || "0");
+
+      if (stage === 0) {
+        const filePathUrl = buildWikimediaFilePathUrl(originalUrl);
+        if (filePathUrl) {
+          img.dataset.fallbackStage = "1";
+          img.src = filePathUrl;
+          return;
+        }
+      }
+
+      if (stage <= 1) {
+        img.dataset.fallbackStage = "2";
+        void (async () => {
+          const wikipediaThumb = await fetchWikipediaThumbnail(figureName);
+          if (wikipediaThumb) {
+            img.src = wikipediaThumb;
+            return;
+          }
+
+          img.dataset.fallbackStage = "3";
+          img.src = "/placeholder.svg";
+        })();
+        return;
+      }
+
+      img.dataset.fallbackStage = "3";
+      img.src = "/placeholder.svg";
+    },
+    [fetchWikipediaThumbnail]
+  );
 
   if (loading) {
     return (
@@ -200,7 +353,7 @@ const WhoWasAlive = () => {
                 value={yearInput}
                 onChange={(e) => handleYearChange(e.target.value)}
                 min={-1500}
-                max={2025}
+                max={maxYear}
                 className="w-32 text-center font-display text-3xl font-bold h-16 border-2 border-primary/30 bg-card"
               />
             </div>
@@ -209,7 +362,7 @@ const WhoWasAlive = () => {
                 value={[year]}
                 onValueChange={handleSliderChange}
                 min={-500}
-                max={2025}
+                max={maxYear}
                 step={1}
                 className="w-full"
               />
@@ -217,7 +370,7 @@ const WhoWasAlive = () => {
                 <span>500 BC</span>
                 <span>Year 0</span>
                 <span>1000</span>
-                <span>2025</span>
+                <span>{maxYear}</span>
               </div>
             </div>
           </motion.div>
@@ -237,21 +390,42 @@ const WhoWasAlive = () => {
             ))}
           </div>
 
+          <div className="max-w-xl mx-auto mb-6 flex items-center gap-2">
+            <Input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              placeholder="Search figure: Elon Musk, Einstein, Socrates..."
+              className="font-body"
+            />
+            <Button type="button" onClick={handleSearch} className="font-display">
+              <Search className="w-4 h-4 mr-1" /> Search
+            </Button>
+            {searchQuery && (
+              <Button type="button" variant="outline" onClick={clearSearch} className="font-display">
+                Clear
+              </Button>
+            )}
+          </div>
+
           {/* Stats */}
           <div className="flex flex-wrap gap-4 justify-center mb-8 text-sm font-body">
             <div className="glass-panel px-4 py-2 flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">Alive:</span>
-              <span className="font-display font-bold text-foreground">{aliveFigures.length}</span>
+              <span className="text-muted-foreground">{searchQuery ? "Results:" : "Alive:"}</span>
+              <span className="font-display font-bold text-foreground">{displayedFigures.length}</span>
             </div>
-            {oldest && (
+            {!searchQuery && oldest && (
               <div className="glass-panel px-4 py-2">
                 <span className="text-muted-foreground">Oldest: </span>
                 <span className="font-display font-bold text-primary">{oldest.name}</span>
                 <span className="text-muted-foreground"> ({year - oldest.birth_year} yrs)</span>
               </div>
             )}
-            {youngest && (
+            {!searchQuery && youngest && (
               <div className="glass-panel px-4 py-2">
                 <span className="text-muted-foreground">Youngest: </span>
                 <span className="font-display font-bold text-secondary">{youngest.name}</span>
@@ -262,7 +436,7 @@ const WhoWasAlive = () => {
 
           {/* Figures Grid */}
           <AnimatePresence mode="popLayout">
-            {aliveFigures.length === 0 ? (
+            {displayedFigures.length === 0 ? (
               <motion.div
                 key="empty"
                 initial={{ opacity: 0 }}
@@ -270,33 +444,41 @@ const WhoWasAlive = () => {
                 className="text-center py-20"
               >
                 <p className="font-display text-xl text-muted-foreground">
-                  No known figures alive in {formatYear(year)}
+                  {searchQuery ? `No figures found for "${searchQuery}"` : `No known figures alive in ${formatYear(year)}`}
                 </p>
-                <p className="font-body text-sm text-muted-foreground mt-2">
-                  Try a year between 500 BC and 2025 AD
-                </p>
+                {searchQuery ? (
+                  <p className="font-body text-sm text-muted-foreground mt-2">
+                    Try searching names like Elon Musk, Einstein, or Socrates
+                  </p>
+                ) : (
+                  <p className="font-body text-sm text-muted-foreground mt-2">
+                    Try a year between 500 BC and {formatYear(maxYear)}
+                  </p>
+                )}
               </motion.div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {aliveFigures.map((figure) => (
-                  <motion.div
+                {displayedFigures.map((figure) => (
+                  <motion.a
                     key={figure.id}
                     layout
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.25 }}
-                    className="glass-panel p-3 group hover:-translate-y-1 transition-transform duration-300 cursor-default"
+                    href={getWikipediaUrl(figure.name)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Open ${figure.name} on Wikipedia`}
+                    className="glass-panel p-3 group hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
                   >
                     <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-3 bg-muted">
                       <img
-                        src={figure.image}
+                        src={getImageUrl(figure.image)}
                         alt={figure.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/placeholder.svg";
-                        }}
+                        onError={(e) => handleImageError(e, figure.image, figure.name)}
                       />
                       {figure.id === oldest?.id && (
                         <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-display px-1.5 py-0.5 rounded-full">
@@ -321,7 +503,7 @@ const WhoWasAlive = () => {
                     <div className="mt-1 font-display text-xs font-bold text-primary">
                       Age: {year - figure.birth_year}
                     </div>
-                  </motion.div>
+                  </motion.a>
                 ))}
               </div>
             )}
@@ -379,13 +561,11 @@ const WhoWasAlive = () => {
                     >
                       <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-muted">
                         <img
-                          src={figure.image}
+                          src={getImageUrl(figure.image)}
                           alt={figure.name}
                           className="w-full h-full object-cover"
                           loading="lazy"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/placeholder.svg";
-                          }}
+                          onError={(e) => handleImageError(e, figure.image, figure.name)}
                         />
                         {selected && !challengeRevealed && (
                           <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
