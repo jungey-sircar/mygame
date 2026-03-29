@@ -42,7 +42,7 @@ export interface QuizState {
 
 const STORAGE_KEY = 'quiz-competition-state';
 
-const defaultState: QuizState = {
+const createDefaultState = (): QuizState => ({
   teams: [
     { id: '1', name: 'Team Alpha', score: 0 },
     { id: '2', name: 'Team Beta', score: 0 },
@@ -61,15 +61,16 @@ const defaultState: QuizState = {
   showAnswer: false,
   showQuestion: false,
   view: 'host',
-};
+});
 
 function loadState(): QuizState {
+  const defaultState = createDefaultState();
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       // Merge any new questions from sampleQuestions that aren't in saved state
-      const savedQuestions: Question[] = parsed.questions || [];
+      const savedQuestions: Question[] = (parsed.questions || []).map((q: Question) => ({ ...q, used: false }));
       const savedIds = new Set(savedQuestions.map((q: Question) => q.id));
       const freshQuestions = sampleQuestions
         .filter(q => !savedIds.has(q.id))
@@ -109,7 +110,7 @@ export function useQuizState() {
         setState(s => {
           const existingIds = new Set(s.questions.map(q => q.id));
           const newOnes = dbQuestions.filter(q => !existingIds.has(q.id));
-          return newOnes.length > 0 ? { ...s, questions: [...s.questions, ...newOnes] } : s;
+          return newOnes.length > 0 ? { ...s, questions: shuffleArray([...s.questions, ...newOnes]) } : s;
         });
       }
     };
@@ -249,14 +250,14 @@ export function useQuizState() {
       if (data && !error) {
         setState(s => ({
           ...s,
-          questions: [...s.questions, { id: data.id, text: data.text, answer: data.answer, category: data.category, difficulty: data.difficulty as any, used: false }],
+          questions: shuffleArray([...s.questions, { id: data.id, text: data.text, answer: data.answer, category: data.category, difficulty: data.difficulty as any, used: false }]),
         }));
         return;
       }
     }
     setState(s => ({
       ...s,
-      questions: [...s.questions, { ...q, id: `custom-${Date.now()}` }],
+      questions: shuffleArray([...s.questions, { ...q, id: `custom-${Date.now()}`, used: false }]),
     }));
   }, [user]);
 
@@ -292,7 +293,7 @@ export function useQuizState() {
 
   const resetAll = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
-    setState(defaultState);
+    setState(createDefaultState());
   }, []);
 
   const importQuestions = useCallback((json: string) => {
@@ -301,7 +302,10 @@ export function useQuizState() {
       if (Array.isArray(parsed)) {
         setState(s => ({
           ...s,
-          questions: [...s.questions, ...parsed.map((q, i) => ({ ...q, id: q.id || `import-${Date.now()}-${i}`, used: false }))],
+          questions: shuffleArray([
+            ...s.questions,
+            ...parsed.map((q, i) => ({ ...q, id: q.id || `import-${Date.now()}-${i}`, used: false })),
+          ]),
         }));
         return true;
       }

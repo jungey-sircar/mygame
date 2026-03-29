@@ -18,13 +18,13 @@ import {
 import conan from "@/assets/conan.png";
 const games = [
   
-  {
-    icon: "🚂",
-    title: "Trolley Simulator",
-    description: "25 moral dilemmas. No right answers.",
-    to: "/trolley",
-    animation: <TrolleyAnim />,
-  },
+    {
+      icon: "🚀",
+      title: "Rocket Space Launch",
+      description: "Launch through asteroid fields, dodge obstacles, and chase a high score.",
+      route: "/space-launch",
+      color: "from-cyan-500 to-blue-600",
+    },
    {
     icon: "⚡",
     title: "VisualCode Lab",
@@ -158,6 +158,12 @@ const games = [
     description: "Click speed, color tap, memory & target shoot mini games.",
     to: "/loop-arcade",
     animation: <SnakeEscapeAnimation />,
+  },
+  {
+    icon: "🏃",
+    title: "Subway Sprint",
+    description: "Run, jump, duck, and dodge obstacles in an endless subway runner.",
+    to: "/subway-sprint",
   },
   {
     icon: "🎡",

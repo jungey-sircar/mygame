@@ -5,8 +5,8 @@ import ParticleBackground from "@/components/ParticleBackground";
 
 const languages = [
   { name: "C Quiz", icon: "🟦", route: "/quiz/c", description: "100 questions on C fundamentals", color: "from-blue-500/20 to-blue-600/10" },
-  { name: "Java Quiz", icon: "🟨", route: "/quiz/java", description: "20 questions on Java OOP & basics", color: "from-amber-500/20 to-yellow-600/10" },
-  { name: "Python Quiz", icon: "🟩", route: "/quiz/python", description: "20 questions on Python essentials", color: "from-green-500/20 to-emerald-600/10" },
+  { name: "Java Quiz", icon: "🟨", route: "/quiz/java", description: "60 popular Java questions", color: "from-amber-500/20 to-yellow-600/10" },
+  { name: "Python Quiz", icon: "🟩", route: "/quiz/python", description: "60 popular Python questions", color: "from-green-500/20 to-emerald-600/10" },
 ];
 
 const QuizHome = () => {
@@ -28,14 +28,12 @@ const QuizHome = () => {
 
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
-          <h1 className="font-display text-3xl sm:text-5xl font-bold text-foreground mb-3 text-glow-purple">
-            💻 Programming Quiz Portal
-          </h1>
-          <p className="font-body text-lg text-muted-foreground">Select a language to begin</p>
+          <h1 className="font-display text-3xl sm:text-5xl font-bold text-foreground mb-3 text-glow-purple">🧠 Quiz Portal</h1>
+          <p className="font-body text-lg text-muted-foreground">Select a category to begin</p>
           <div className="mt-6 mx-auto w-48 h-[2px] bg-gradient-to-r from-transparent via-neon-purple to-transparent opacity-60" />
         </div>
 
-        {/* Language Cards */}
+        {/* Category Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {languages.map((lang, i) => (
             <motion.button

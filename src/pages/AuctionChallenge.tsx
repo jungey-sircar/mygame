@@ -26,6 +26,8 @@ interface SessionRecord {
   result: GuessResult;
 }
 
+const shuffleItems = <T,>(list: T[]) => [...list].sort(() => Math.random() - 0.5);
+
 // ─── Helpers ──────────────────────────────────────────────
 const formatPrice = (n: number) =>
   "$" + n.toLocaleString("en-US");
@@ -106,15 +108,20 @@ const AuctionChallenge = () => {
 
   const ITEMS_PER_SESSION = 7;
 
+  const buildSessionItems = (remoteItems: AuctionItem[]) => {
+    return shuffleItems(remoteItems).slice(0, ITEMS_PER_SESSION);
+  };
+
   // Fetch items
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const { data, error } = await supabase.functions.invoke("auction/items");
         if (error) throw error;
-        setItems((data as AuctionItem[]).slice(0, ITEMS_PER_SESSION));
+        setItems(buildSessionItems((data as AuctionItem[]) || []));
       } catch (e) {
         console.error("Failed to fetch auction items:", e);
+        setItems(buildSessionItems([]));
       } finally {
         setLoading(false);
       }
@@ -157,7 +164,7 @@ const AuctionChallenge = () => {
     30: "/auction-images/inverted-jenny.jpg",
   };
 
-  const getImageSrc = (item: AuctionItem) => localImageMap[item.id] || "";
+  const getImageSrc = (item: AuctionItem) => localImageMap[item.id] || item.image || "";
 
   useEffect(() => {
     setImageFailed(false);
@@ -175,12 +182,14 @@ const AuctionChallenge = () => {
   const submitGuess = useCallback(async () => {
     if (!guess || !currentItem || submitting) return;
     setSubmitting(true);
+    const guessed = parseInt(guess);
     try {
       const { data, error } = await supabase.functions.invoke("auction/guess", {
-        body: { itemId: currentItem.id, guess: parseInt(guess) },
+        body: { itemId: currentItem.id, guess: guessed },
       });
       if (error) throw error;
       const res = data as GuessResult;
+
       setResult(res);
       setTotalScore((s) => s + res.score);
       setHistory((h) => [...h, { item: currentItem, result: res }]);
@@ -214,7 +223,10 @@ const AuctionChallenge = () => {
     setGameOver(false);
     setLoading(true);
     supabase.functions.invoke("auction/items").then(({ data }) => {
-      setItems(((data as AuctionItem[]) || []).slice(0, ITEMS_PER_SESSION));
+      setItems(buildSessionItems((data as AuctionItem[]) || []));
+      setLoading(false);
+    }).catch(() => {
+      setItems(buildSessionItems([]));
       setLoading(false);
     });
   };
@@ -383,8 +395,6 @@ const AuctionChallenge = () => {
                 animate={{ scale: imageHover ? 1.05 : 1 }}
                 transition={{ duration: 0.4 }}
                 loading="eager"
-                referrerPolicy="no-referrer"
-                crossOrigin="anonymous"
                 onError={() => setImageFailed(true)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

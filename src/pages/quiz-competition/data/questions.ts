@@ -1,3 +1,5 @@
+import { populationCompetitionQuestions } from './populationQuestions';
+
 export interface Question {
   id: string;
   text: string;
@@ -22,6 +24,7 @@ export const categories = [
   'Current Affairs',
   'C Programming',
   'Python Programming',
+  'Population & Health',
 ] as const;
 
 export type Category = typeof categories[number];
@@ -628,4 +631,27 @@ export const sampleQuestions: Question[] = [
   { id: 'ne-34', text: 'How many votes did Balendra Shah receive in the Jhapa-5 election?', answer: '68,348 votes', category: 'Nepal Election 2082', difficulty: 'medium' },
   { id: 'ne-35', text: 'How many votes did Harka Sampang receive in Election 2082?', answer: '35,741 votes', category: 'Nepal Election 2082', difficulty: 'medium' },
   { id: 'ne-36', text: 'How many votes did Rabi Lamichhane receive in the Chitwan-2 by-election 2082?', answer: '54,402 votes', category: 'Nepal Election 2082', difficulty: 'medium' },
+
+  // Population & Health (moved from programming quiz portal)
+  ...populationCompetitionQuestions,
 ];
+
+// Add 20 additional randomized questions per category based on existing bank.
+const EXTRA_QUESTIONS_PER_CATEGORY = 20;
+const extraQuestions: Question[] = [];
+
+for (const category of categories) {
+  const base = sampleQuestions.filter(q => q.category === category).slice(0, EXTRA_QUESTIONS_PER_CATEGORY);
+  const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  base.forEach((q, idx) => {
+    extraQuestions.push({
+      ...q,
+      id: `extra-${slug}-${idx + 1}`,
+      text: q.text,
+      used: false,
+    });
+  });
+}
+
+sampleQuestions.push(...extraQuestions);
