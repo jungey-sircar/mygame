@@ -94,6 +94,39 @@ const LOCAL_PRICE_MAP: Record<number, number> = {
   30: 1900000,
 };
 
+const LOCAL_ITEM_DETAILS: Record<number, { name: string; description: string; year: string }> = {
+  1: { name: "Mona Lisa", description: "Leonardo da Vinci portrait masterpiece, famed for its sfumato technique and enigmatic expression.", year: "c.1503" },
+  2: { name: "The Scream", description: "Edvard Munch expressionist icon depicting psychological tension with dramatic sky and line work.", year: "1893" },
+  3: { name: "Salvator Mundi", description: "Attributed Renaissance Christ portrait rediscovered and sold as one of the highest-value paintings ever.", year: "c.1500" },
+  4: { name: "Les Femmes d'Alger", description: "Picasso's Cubist reinterpretation inspired by Delacroix, from his celebrated late period series.", year: "1955" },
+  5: { name: "No. 5, 1948", description: "Jackson Pollock drip-era abstract with dense layered enamel strokes across a monumental surface.", year: "1948" },
+  6: { name: "The Starry Night", description: "Van Gogh nightscape with swirling celestial motion and bold, emotive brushwork.", year: "1889" },
+  7: { name: "Girl with a Pearl Earring", description: "Johannes Vermeer tronie known for subtle light, color harmony, and iconic pearl highlight.", year: "c.1665" },
+  8: { name: "Ferrari 250 GTO", description: "Ultra-rare homologation race car with elite motorsport pedigree and exceptional collector demand.", year: "1962" },
+  9: { name: "Codex Leicester", description: "Leonardo da Vinci scientific notebook containing studies on water, astronomy, and natural phenomena.", year: "c.1510" },
+  10: { name: "Action Comics #1", description: "Landmark comic introducing Superman, considered the foundational issue of superhero publishing.", year: "1938" },
+  11: { name: "The Persistence of Memory", description: "Dali surrealist work featuring melting clocks and dreamlike symbolic desert imagery.", year: "1931" },
+  12: { name: "Water Lilies", description: "Monet late-series Impressionist canvas exploring light reflection and atmosphere on garden ponds.", year: "c.1916" },
+  13: { name: "The Kiss", description: "Gustav Klimt golden-period composition with ornamental geometry and gilded decorative surfaces.", year: "1908" },
+  14: { name: "The Great Wave", description: "Hokusai woodblock print from Thirty-Six Views of Mount Fuji, globally recognized ukiyo-e image.", year: "c.1831" },
+  15: { name: "The Birth of Venus", description: "Botticelli mythological Renaissance scene portraying Venus emerging from the sea.", year: "c.1485" },
+  16: { name: "American Gothic", description: "Grant Wood regionalist portrait famous for its iconic rural American figures and composition.", year: "1930" },
+  17: { name: "Nighthawks", description: "Edward Hopper urban night diner scene emphasizing isolation, light, and modern city mood.", year: "1942" },
+  18: { name: "Ferrari 250 GT Lusso", description: "Classic grand-touring Ferrari admired for elegant body lines and limited production rarity.", year: "1963" },
+  19: { name: "Declaration of Independence", description: "Historic foundational U.S. document manuscript associated with nation-defining political history.", year: "1776" },
+  20: { name: "Lady Blunt Violin", description: "Exceptionally preserved Stradivarius violin, highly prized for condition, provenance, and craftsmanship.", year: "1721" },
+  21: { name: "Hope Diamond", description: "Legendary deep-blue gemstone known for historic ownership chain and rare color saturation.", year: "17th c." },
+  22: { name: "Stan T-Rex", description: "Tyrannosaurus rex fossil cast based on one of the most complete and studied specimens.", year: "Cretaceous" },
+  23: { name: "Honus Wagner Card", description: "T206 tobacco card grail with extreme scarcity, central to elite sports memorabilia auctions.", year: "1909" },
+  24: { name: "Codex Hammer", description: "Alternate reference to Leonardo manuscript pages covering physics and observational studies.", year: "c.1508" },
+  25: { name: "Interchange", description: "Willem de Kooning abstract expressionist landmark with energetic gestural color fields.", year: "1955" },
+  26: { name: "Shot Sage Blue Marilyn", description: "Andy Warhol screenprint portrait from the Marilyn series with bold Pop Art color treatment.", year: "1964" },
+  27: { name: "The Card Players", description: "Cezanne post-impressionist series depicting peasants in quiet, structured tabletop scenes.", year: "c.1895" },
+  28: { name: "Guernica", description: "Picasso anti-war mural-scale work responding to the bombing of Guernica in the Spanish Civil War.", year: "1937" },
+  29: { name: "Rolex Daytona", description: "Highly collectible chronograph wristwatch line valued for rarity, references, and provenance.", year: "1960s" },
+  30: { name: "Inverted Jenny", description: "Rare U.S. airmail stamp error with inverted biplane center, iconic philatelic collectible.", year: "1918" },
+};
+
 const titleFromImagePath = (path: string) => {
   const file = path.split("/").pop() || "auction-item";
   const base = file.replace(/\.(jpg|jpeg|png|webp)$/i, "");
@@ -106,12 +139,13 @@ const titleFromImagePath = (path: string) => {
 const buildLocalAuctionItems = (): AuctionItem[] => {
   return Object.entries(LOCAL_IMAGE_MAP).map(([idText, imagePath]) => {
     const id = Number(idText);
+    const details = LOCAL_ITEM_DETAILS[id];
     return {
       id,
-      name: titleFromImagePath(imagePath),
-      description: "Featured from the local auction archive.",
+      name: details?.name || titleFromImagePath(imagePath),
+      description: details?.description || `${titleFromImagePath(imagePath)} from the local collection with verified auction-style metadata.`,
       image: imagePath,
-      year: "Archive",
+      year: details?.year || "Archive",
     };
   });
 };
