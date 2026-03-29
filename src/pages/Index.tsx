@@ -17,15 +17,14 @@ import {
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const games = [
-  
-    {
-      icon: "🚀",
-      title: "Rocket Space Launch",
-      description: "Launch through asteroid fields, dodge obstacles, and chase a high score.",
-      route: "/space-launch",
-      color: "from-cyan-500 to-blue-600",
-    },
-   {
+  {
+    icon: "🚋",
+    title: "Trolley Simulator",
+    description: "Face ethical dilemmas and make impossible choices under pressure.",
+    to: "/trolley",
+    animation: <TrolleyAnim />,
+  },
+  {
     icon: "⚡",
     title: "VisualCode Lab",
     description: "Visualize real code execution with animated memory, variables, and function flow.",
@@ -160,9 +159,9 @@ const games = [
     animation: <SnakeEscapeAnimation />,
   },
   {
-    icon: "🏃",
-    title: "Subway Sprint",
-    description: "Run, jump, duck, and dodge obstacles in an endless subway runner.",
+    icon: "🚀",
+    title: "Rocket Space Launch",
+    description: "Launch through asteroid fields, dodge obstacles, and chase a high score.",
     to: "/subway-sprint",
   },
   {

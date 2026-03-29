@@ -28,6 +28,109 @@ interface SessionRecord {
 
 const shuffleItems = <T,>(list: T[]) => [...list].sort(() => Math.random() - 0.5);
 
+const LOCAL_IMAGE_MAP: Record<number, string> = {
+  1: "/auction-images/mona-lisa.jpg",
+  2: "/auction-images/the-scream.jpg",
+  3: "/auction-images/salvator-mundi.jpg",
+  4: "/auction-images/les-femmes-dalger.png",
+  5: "/auction-images/no-5-1948.jpg",
+  6: "/auction-images/starry-night.jpg",
+  7: "/auction-images/girl-with-pearl-earring.jpg",
+  8: "/auction-images/ferrari-250-gto.jpg",
+  9: "/auction-images/codex-leicester.jpg",
+  10: "/auction-images/action-comics-1.jpg",
+  11: "/auction-images/persistence-of-memory.jpg",
+  12: "/auction-images/water-lilies.jpg",
+  13: "/auction-images/the-kiss.jpg",
+  14: "/auction-images/great-wave.jpg",
+  15: "/auction-images/birth-of-venus.jpg",
+  16: "/auction-images/american-gothic.jpg",
+  17: "/auction-images/nighthawks.jpg",
+  18: "/auction-images/ferrari-250-gt-lusso.jpg",
+  19: "/auction-images/declaration-of-independence.jpg",
+  20: "/auction-images/lady-blunt-violin.jpg",
+  21: "/auction-images/hope-diamond.jpg",
+  22: "/auction-images/stan-trex.jpg",
+  23: "/auction-images/honus-wagner-card.jpg",
+  24: "/auction-images/codex-hammer.jpg",
+  25: "/auction-images/interchange.jpg",
+  26: "/auction-images/shot-sage-blue-marilyn.jpg",
+  27: "/auction-images/card-players.jpg",
+  28: "/auction-images/guernica.jpg",
+  29: "/auction-images/rolex-daytona.png",
+  30: "/auction-images/inverted-jenny.jpg",
+};
+
+const LOCAL_PRICE_MAP: Record<number, number> = {
+  1: 860000000,
+  2: 120000000,
+  3: 450300000,
+  4: 179400000,
+  5: 140000000,
+  6: 100000000,
+  7: 74000000,
+  8: 70000000,
+  9: 30800000,
+  10: 3200000,
+  11: 55000000,
+  12: 50000000,
+  13: 135000000,
+  14: 40000000,
+  15: 200000000,
+  16: 7000000,
+  17: 3000000,
+  18: 35000000,
+  19: 43000000,
+  20: 15900000,
+  21: 200000000,
+  22: 32000000,
+  23: 7600000,
+  24: 30800000,
+  25: 300500000,
+  26: 195000000,
+  27: 250000000,
+  28: 200000000,
+  29: 17800000,
+  30: 1900000,
+};
+
+const titleFromImagePath = (path: string) => {
+  const file = path.split("/").pop() || "auction-item";
+  const base = file.replace(/\.(jpg|jpeg|png|webp)$/i, "");
+  return base
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const buildLocalAuctionItems = (): AuctionItem[] => {
+  return Object.entries(LOCAL_IMAGE_MAP).map(([idText, imagePath]) => {
+    const id = Number(idText);
+    return {
+      id,
+      name: titleFromImagePath(imagePath),
+      description: "Featured from the local auction archive.",
+      image: imagePath,
+      year: "Archive",
+    };
+  });
+};
+
+const calcLocalGuessResult = (itemId: number, guess: number): GuessResult => {
+  const actual = LOCAL_PRICE_MAP[itemId] ?? 1000000;
+  const difference = Math.abs(actual - guess);
+  const percentOff = actual > 0 ? Math.round((difference / actual) * 100) : 0;
+  const score = Math.max(0, 1000 - Math.min(1000, percentOff * 10));
+
+  return {
+    actual_price: actual,
+    guess,
+    difference,
+    percent_off: percentOff,
+    score,
+  };
+};
+
 // ─── Helpers ──────────────────────────────────────────────
 const formatPrice = (n: number) =>
   "$" + n.toLocaleString("en-US");
@@ -105,66 +208,44 @@ const AuctionChallenge = () => {
   const [gameOver, setGameOver] = useState(false);
   const [imageHover, setImageHover] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const ITEMS_PER_SESSION = 7;
 
-  const buildSessionItems = (remoteItems: AuctionItem[]) => {
-    return shuffleItems(remoteItems).slice(0, ITEMS_PER_SESSION);
-  };
+  const loadItems = useCallback(async () => {
+    setLoading(true);
+    setFetchError(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("auction/items");
+      if (error) throw error;
+
+      const onlineItems = Array.isArray(data) ? (data as AuctionItem[]) : [];
+      if (onlineItems.length > 0) {
+        setItems(shuffleItems(onlineItems).slice(0, ITEMS_PER_SESSION));
+      } else {
+        const offlineItems = shuffleItems(buildLocalAuctionItems()).slice(0, ITEMS_PER_SESSION);
+        setItems(offlineItems);
+        setFetchError("Using local auction data (online auction service unavailable).");
+      }
+    } catch (e) {
+      console.error("Failed to fetch auction items:", e);
+      const offlineItems = shuffleItems(buildLocalAuctionItems()).slice(0, ITEMS_PER_SESSION);
+      setItems(offlineItems);
+      setFetchError("Using local auction data (online auction service unavailable).");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Fetch items
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("auction/items");
-        if (error) throw error;
-        setItems(buildSessionItems((data as AuctionItem[]) || []));
-      } catch (e) {
-        console.error("Failed to fetch auction items:", e);
-        setItems(buildSessionItems([]));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
-  }, []);
+    loadItems();
+  }, [loadItems]);
 
   const currentItem = items[currentIdx];
 
-  const localImageMap: Record<number, string> = {
-    1: "/auction-images/mona-lisa.jpg",
-    2: "/auction-images/the-scream.jpg",
-    3: "/auction-images/salvator-mundi.jpg",
-    4: "/auction-images/les-femmes-dalger.png",
-    5: "/auction-images/no-5-1948.jpg",
-    6: "/auction-images/starry-night.jpg",
-    7: "/auction-images/girl-with-pearl-earring.jpg",
-    8: "/auction-images/ferrari-250-gto.jpg",
-    9: "/auction-images/codex-leicester.jpg",
-    10: "/auction-images/action-comics-1.jpg",
-    11: "/auction-images/persistence-of-memory.jpg",
-    12: "/auction-images/water-lilies.jpg",
-    13: "/auction-images/the-kiss.jpg",
-    14: "/auction-images/great-wave.jpg",
-    15: "/auction-images/birth-of-venus.jpg",
-    16: "/auction-images/american-gothic.jpg",
-    17: "/auction-images/nighthawks.jpg",
-    18: "/auction-images/ferrari-250-gt-lusso.jpg",
-    19: "/auction-images/declaration-of-independence.jpg",
-    20: "/auction-images/lady-blunt-violin.jpg",
-    21: "/auction-images/hope-diamond.jpg",
-    22: "/auction-images/stan-trex.jpg",
-    23: "/auction-images/honus-wagner-card.jpg",
-    24: "/auction-images/codex-hammer.jpg",
-    25: "/auction-images/interchange.jpg",
-    26: "/auction-images/shot-sage-blue-marilyn.jpg",
-    27: "/auction-images/card-players.jpg",
-    28: "/auction-images/guernica.jpg",
-    29: "/auction-images/rolex-daytona.png",
-    30: "/auction-images/inverted-jenny.jpg",
-  };
-
-  const getImageSrc = (item: AuctionItem) => localImageMap[item.id] || item.image || "";
+  const getImageSrc = (item: AuctionItem) => LOCAL_IMAGE_MAP[item.id] || item.image || "";
 
   useEffect(() => {
     setImageFailed(false);
@@ -182,14 +263,14 @@ const AuctionChallenge = () => {
   const submitGuess = useCallback(async () => {
     if (!guess || !currentItem || submitting) return;
     setSubmitting(true);
-    const guessed = parseInt(guess);
+    const guessed = parseInt(guess, 10);
+
     try {
       const { data, error } = await supabase.functions.invoke("auction/guess", {
         body: { itemId: currentItem.id, guess: guessed },
       });
       if (error) throw error;
       const res = data as GuessResult;
-
       setResult(res);
       setTotalScore((s) => s + res.score);
       setHistory((h) => [...h, { item: currentItem, result: res }]);
@@ -198,6 +279,12 @@ const AuctionChallenge = () => {
       playRevealSound();
     } catch (e) {
       console.error("Failed to submit guess:", e);
+      const res = calcLocalGuessResult(currentItem.id, guessed);
+      setResult(res);
+      setTotalScore((s) => s + res.score);
+      setHistory((h) => [...h, { item: currentItem, result: res }]);
+      setFetchError("Using local score calculation (online bid check unavailable).");
+      playRevealSound();
     } finally {
       setSubmitting(false);
     }
@@ -221,14 +308,7 @@ const AuctionChallenge = () => {
     setTotalScore(0);
     setHistory([]);
     setGameOver(false);
-    setLoading(true);
-    supabase.functions.invoke("auction/items").then(({ data }) => {
-      setItems(buildSessionItems((data as AuctionItem[]) || []));
-      setLoading(false);
-    }).catch(() => {
-      setItems(buildSessionItems([]));
-      setLoading(false);
-    });
+    loadItems();
   };
 
   const playRevealSound = () => {
@@ -325,7 +405,7 @@ const AuctionChallenge = () => {
   }
 
   // ─── LOADING ────────────────────────────────────────────
-  if (loading || !currentItem) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#111118] to-[#0a0a0f] flex items-center justify-center">
         <motion.div
@@ -335,6 +415,31 @@ const AuctionChallenge = () => {
         >
           Loading auction items...
         </motion.div>
+      </div>
+    );
+  }
+
+  if (!currentItem) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#111118] to-[#0a0a0f] flex items-center justify-center p-4">
+        <div className="max-w-lg w-full text-center">
+          <h2 className="text-2xl font-black text-white mb-2">No auction items available</h2>
+          <p className="text-white/60 mb-6">Could not load the local or online auction item list.</p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => navigate("/")}
+              className="px-5 py-3 rounded-xl border border-white/20 text-white/70 font-semibold hover:bg-white/5 transition-colors"
+            >
+              Back to Arena
+            </button>
+            <button
+              onClick={loadItems}
+              className="px-5 py-3 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors"
+            >
+              Retry Load
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -370,6 +475,12 @@ const AuctionChallenge = () => {
           </div>
         </div>
 
+        {fetchError && (
+          <div className="w-full max-w-3xl mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-300">
+            {fetchError}
+          </div>
+        )}
+
         {/* Item Display */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -395,6 +506,8 @@ const AuctionChallenge = () => {
                 animate={{ scale: imageHover ? 1.05 : 1 }}
                 transition={{ duration: 0.4 }}
                 loading="eager"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
                 onError={() => setImageFailed(true)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
