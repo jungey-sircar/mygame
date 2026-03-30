@@ -6,6 +6,7 @@ import { io, type Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import ParticleBackground from "@/components/ParticleBackground";
+import Confetti from "@/components/Confetti";
 import BingoBoard from "./components/BingoBoard";
 import WordCaller from "./components/WordCaller";
 import { wordSets, type WordSet } from "./data/wordSets";
@@ -22,6 +23,33 @@ const isLocalHost = isBrowser && ["localhost", "127.0.0.1"].includes(window.loca
 const SERVER_URL = import.meta.env.VITE_BINGO_SERVER_URL
   || (isLocalHost ? "http://localhost:4001" : (isBrowser ? window.location.origin : "http://localhost:4001"));
 
+const playWinSound = () => {
+  try {
+    const ctx = new AudioContext();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.09;
+    gain.connect(ctx.destination);
+
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    const now = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, now + i * 0.09);
+      osc.connect(gain);
+      osc.start(now + i * 0.09);
+      osc.stop(now + i * 0.09 + 0.16);
+    });
+
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+    setTimeout(() => {
+      void ctx.close();
+    }, 760);
+  } catch {
+    // Non-blocking sound effect failure should not affect gameplay.
+  }
+};
+
 const WordBingo = () => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -35,6 +63,7 @@ const WordBingo = () => {
   const [calledWords, setCalledWords] = useState<string[]>([]);
   const [gameState, setGameState] = useState<WordGameStatePayload | null>(null);
   const [resultBanner, setResultBanner] = useState<WordBingoResultPayload | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const calledSet = useMemo(() => new Set(calledWords), [calledWords]);
@@ -116,11 +145,28 @@ const WordBingo = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!resultBanner?.valid) return;
+    if (resultBanner.winnerSocketId !== socketRef.current?.id) return;
+
+    setShowConfetti(true);
+    playWinSound();
+
+    const timeoutId = window.setTimeout(() => {
+      setShowConfetti(false);
+    }, 3200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resultBanner]);
+
   const joinRoom = () => {
     const normalizedRoom = roomIdInput.trim().toUpperCase() || "MAIN";
     const normalizedName = playerName.trim() || "Player";
     setErrorMsg("");
     setResultBanner(null);
+    setShowConfetti(false);
 
     socketRef.current?.emit("join_word_game", {
       roomId: normalizedRoom,
@@ -131,6 +177,7 @@ const WordBingo = () => {
   const startMatch = () => {
     setErrorMsg("");
     setResultBanner(null);
+    setShowConfetti(false);
     socketRef.current?.emit("start_word_game", {
       roomId: displayRoomId || roomIdInput,
       categoryName: selectedCategory.name,
@@ -156,6 +203,7 @@ const WordBingo = () => {
 
   const restartMatch = () => {
     setResultBanner(null);
+    setShowConfetti(false);
     socketRef.current?.emit("restart_word_game", {
       roomId: displayRoomId || roomIdInput,
     });
@@ -204,6 +252,7 @@ const WordBingo = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
+      {showConfetti && <Confetti />}
       <div className="relative z-10 flex flex-col items-center px-4 py-6 sm:py-10 gap-5 sm:gap-6 max-w-6xl mx-auto">
         <div className="w-full max-w-5xl flex items-center justify-between">
           <Link to="/">
