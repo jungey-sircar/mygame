@@ -43,7 +43,7 @@ const WIN_LINES = (() => {
 
 /** @typedef {{ cardId: string, card: (number | null)[], marked: Set<number> }} CardState */
 /** @typedef {{ socketId: string, name: string, cards: CardState[] }} PlayerState */
-/** @typedef {{ id: string, status: "waiting"|"playing"|"finished", players: Map<string, PlayerState>, drawnNumbers: number[], remainingNumbers: number[], winnerSocketId: string | null, hostSocketId: string | null, drawTimer: NodeJS.Timeout | null }} RoomState */
+/** @typedef {{ id: string, status: "waiting"|"playing"|"finished", players: Map<string, PlayerState>, drawnNumbers: number[], remainingNumbers: number[], winnerSocketId: string | null, hostSocketId: string | null, drawTimer: NodeJS.Timeout | null, callMode: "auto"|"manual" }} RoomState */
 /** @typedef {{ socketId: string, name: string, card: (string | null)[] | null, marked: Set<number> }} WordPlayerState */
 /** @typedef {{ id: string, status: "waiting"|"playing"|"finished", players: Map<string, WordPlayerState>, calledWords: string[], drawPool: string[], winnerSocketId: string | null, hostSocketId: string | null, drawTimer: NodeJS.Timeout | null, categoryName: string | null, sourceWords: string[], callMode: "auto"|"manual", roundWordCount: number }} WordRoomState */
 
@@ -128,6 +128,7 @@ function createRoom(roomId, hostSocketId) {
     winnerSocketId: null,
     hostSocketId,
     drawTimer: null,
+    callMode: "auto",
   };
 }
 
@@ -151,6 +152,7 @@ function serializeRoom(room) {
     roomId: room.id,
     status: room.status,
     drawnNumbers: room.drawnNumbers,
+    callMode: room.callMode,
     winnerSocketId: room.winnerSocketId,
     winnerName: winnerPlayer ? winnerPlayer.name : null,
     players: [...room.players.values()].map((player) => ({
@@ -459,13 +461,36 @@ io.on("connection", (socket) => {
 
     room.status = "playing";
     emitRoomState(io, room);
-    startAutoDraw(io, room);
+    if (room.callMode === "auto") {
+      startAutoDraw(io, room);
+    } else {
+      stopAutoDraw(room);
+    }
+  });
+
+  socket.on("set_number_call_mode", (payload = {}) => {
+    const room = rooms.get(sanitizeRoomId(payload.roomId));
+    if (!room || room.hostSocketId !== socket.id) return;
+
+    const mode = payload.mode === "manual" ? "manual" : "auto";
+    room.callMode = mode;
+
+    if (room.status === "playing") {
+      if (mode === "auto") {
+        startAutoDraw(io, room);
+      } else {
+        stopAutoDraw(room);
+      }
+    }
+
+    emitRoomState(io, room);
   });
 
   socket.on("draw_number", ({ roomId }) => {
     const room = rooms.get(sanitizeRoomId(roomId));
     if (!room || room.hostSocketId !== socket.id) return;
     if (room.status === "finished") return;
+    if (room.callMode !== "manual") return;
     room.status = "playing";
     drawNextNumber(io, room);
   });

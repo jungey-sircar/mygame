@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, SkipForward } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import ParticleBackground from "@/components/ParticleBackground";
-import type { BingoCardState, BingoResultPayload, GameStatePayload, NumberCalledPayload } from "./types";
+import type { BingoCardState, BingoResultPayload, GameStatePayload, NumberCallMode, NumberCalledPayload } from "./types";
 
 const isBrowser = typeof window !== "undefined";
 const isLocalHost = isBrowser && ["localhost", "127.0.0.1"].includes(window.location.hostname);
@@ -51,6 +51,7 @@ const NumberBingo = () => {
   const calledSet = useMemo(() => new Set(calledNumbers), [calledNumbers]);
   const latestCalled = calledNumbers.length > 0 ? calledNumbers[calledNumbers.length - 1] : null;
   const amIHost = Boolean(gameState?.players.find((p) => p.socketId === socketRef.current?.id)?.isHost);
+  const callMode: NumberCallMode = gameState?.callMode || "auto";
 
   useEffect(() => {
     const socket = io(SERVER_URL, {
@@ -158,6 +159,14 @@ const NumberBingo = () => {
   const restartGame = () => {
     setResultBanner(null);
     socketRef.current?.emit("restart_game", { roomId });
+  };
+  const changeCallMode = (mode: NumberCallMode) => {
+    if (!amIHost) return;
+    socketRef.current?.emit("set_number_call_mode", { roomId, mode });
+  };
+  const callNextNumber = () => {
+    if (!amIHost || callMode !== "manual" || gameState?.status !== "playing") return;
+    socketRef.current?.emit("draw_number", { roomId });
   };
 
   return (
@@ -278,8 +287,37 @@ const NumberBingo = () => {
                     )}
                   </div>
 
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant={callMode === "auto" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => changeCallMode("auto")}
+                      disabled={!amIHost}
+                    >
+                      Auto
+                    </Button>
+                    <Button
+                      variant={callMode === "manual" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => changeCallMode("manual")}
+                      disabled={!amIHost}
+                    >
+                      Manual
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={callNextNumber}
+                      disabled={!amIHost || callMode !== "manual" || gameState?.status !== "playing"}
+                    >
+                      <SkipForward className="w-4 h-4 mr-1" /> Next Number
+                    </Button>
+                  </div>
+
                   <p className="text-xs text-muted-foreground">
-                    Numbers are auto-drawn by the server every 4 seconds once the game starts.
+                    {amIHost
+                      ? `Host controls call mode (${callMode.toUpperCase()}).`
+                      : `Host selected mode: ${callMode.toUpperCase()}`}
                   </p>
 
                   {cards.length > 1 && (

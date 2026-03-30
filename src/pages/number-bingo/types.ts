@@ -1,4 +1,5 @@
 export type GameStatus = "waiting" | "playing" | "finished";
+export type NumberCallMode = "auto" | "manual";
 
 export interface BingoCardState {
   cardId: string;
@@ -16,6 +17,7 @@ export interface GameStatePayload {
   roomId: string;
   status: GameStatus;
   drawnNumbers: number[];
+  callMode: NumberCallMode;
   players: GamePlayer[];
   winnerSocketId: string | null;
   winnerName: string | null;
