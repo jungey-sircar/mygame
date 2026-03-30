@@ -331,7 +331,12 @@ const DrawCircle = () => {
       if (intersections >= 3) break;
     }
 
-    if (intersections > 0) {
+    // Allow tiny one-off crossover artifacts near closure; only reject clearly crossed paths.
+    const severeCrossing = intersections >= 2;
+    const suspiciousSingleCrossing =
+      intersections === 1 &&
+      (closureRatio > 0.22 || revolutions < 0.9 || revolutions > 1.12 || turnRatio > 1.22);
+    if (severeCrossing || suspiciousSingleCrossing) {
       return { violated: true, message: "Path crossed itself - circle rule violated" };
     }
     if (revolutions < 0.72) {
