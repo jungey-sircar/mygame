@@ -648,7 +648,7 @@ const DrawCircle = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
+            className="absolute inset-x-0 top-6 sm:top-10 flex flex-col items-center z-20 pointer-events-none"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
