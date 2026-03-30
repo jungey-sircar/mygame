@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
+import { HISTORICAL_FIGURES } from "@/data/historicalFigures";
+import { MODERN_INFLUENTIAL_PEOPLE } from "@/data/modernInfluentialPeople";
 
 interface Figure {
   id: number;
@@ -21,6 +23,11 @@ interface ChallengeData {
   year: number;
   figures: Figure[];
 }
+
+const FALLBACK_FIGURES: Figure[] = HISTORICAL_FIGURES
+  .filter((f) => f.birth_year <= 2026 && f.death_year >= -500)
+  .filter((f, i, arr) => arr.findIndex((x) => x.name === f.name) === i)
+  .map((f) => ({ ...f }));
 
 const categories = ["All", "Writers", "Scientists", "Politicians", "Artists", "Philosophers", "Musicians", "Inventors"];
 
@@ -46,11 +53,6 @@ const buildWikimediaFilePathUrl = (originalUrl: string): string | null => {
 };
 
 const getImageUrl = (originalUrl: string): string => {
-  // Weserv expects the remote URL without protocol in the `url` query param.
-  if (originalUrl.includes("wikimedia.org") || originalUrl.includes("wikipedia.org")) {
-    const normalized = originalUrl.replace(/^https?:\/\//, "");
-    return `https://images.weserv.nl/?url=${encodeURIComponent(normalized)}&output=webp&q=80`;
-  }
   return originalUrl;
 };
 
@@ -61,6 +63,46 @@ const getWikipediaUrl = (name: string): string => {
 };
 
 const BROTHERS_GRIMM_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Grimm.jpg/330px-Grimm.jpg";
+
+const ALWAYS_INCLUDED_FIGURES: Figure[] = MODERN_INFLUENTIAL_PEOPLE.map((f) => ({ ...f }));
+
+const withFallbackFigures = (input: Figure[], maxYear: number): Figure[] => {
+  const source = input.length ? input : FALLBACK_FIGURES;
+
+  const nextFigures = source.map((f) => {
+    if (normalizeSearch(f.name).includes("brothers grimm")) {
+      return {
+        ...f,
+        image: BROTHERS_GRIMM_IMAGE_URL,
+      };
+    }
+
+    return f;
+  });
+
+  ALWAYS_INCLUDED_FIGURES.forEach((figure) => {
+    const exists = nextFigures.some((f) => normalizeSearch(f.name) === normalizeSearch(figure.name));
+    if (!exists) {
+      nextFigures.push({
+        ...figure,
+        death_year: Math.max(figure.death_year, maxYear + 10),
+      });
+    }
+  });
+
+  return nextFigures;
+};
+
+const createFallbackChallenge = (figures: Figure[]): ChallengeData => {
+  const source = figures.length ? figures : FALLBACK_FIGURES;
+  const year = Math.floor(Math.random() * (2000 - -500 + 1)) + -500;
+  const shuffled = [...source].sort(() => Math.random() - 0.5);
+
+  return {
+    year,
+    figures: shuffled.slice(0, Math.min(8, shuffled.length)),
+  };
+};
 
 const WhoWasAlive = () => {
   const [figures, setFigures] = useState<Figure[]>([]);
@@ -81,10 +123,7 @@ const WhoWasAlive = () => {
   const [challengeRound, setChallengeRound] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const wikipediaImageCache = useRef<Record<string, string>>({});
-
-  useEffect(() => {
-    fetchFigures();
-  }, []);
+  const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const updateMaxYear = () => setMaxYear(new Date().getFullYear());
@@ -95,45 +134,29 @@ const WhoWasAlive = () => {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const fetchFigures = async () => {
+  const fetchFigures = useCallback(async () => {
     try {
-      const { data } = await supabase.functions.invoke("historical-figures", {
+      const { data, error } = await supabase.functions.invoke("historical-figures", {
         body: null,
         method: "GET",
       });
-      if (data) {
-        const nextFigures: Figure[] = (Array.isArray(data) ? data : []).map((f: Figure) => {
-          if (normalizeSearch(f.name).includes("brothers grimm")) {
-            return {
-              ...f,
-              image: BROTHERS_GRIMM_IMAGE_URL,
-            };
-          }
-
-          return f;
-        });
-        const hasElon = nextFigures.some((f) => normalizeSearch(f.name) === "elon musk");
-
-        if (!hasElon) {
-          nextFigures.push({
-            id: 10001,
-            name: "Elon Musk",
-            birth_year: 1971,
-            death_year: maxYear + 100,
-            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Elon_Musk_Royal_Society_%28crop1%29.jpg/220px-Elon_Musk_Royal_Society_%28crop1%29.jpg",
-            description: "Entrepreneur and technology business leader",
-            category: "Inventors",
-          });
-        }
-
-        setFigures(nextFigures);
+      if (error) {
+        console.warn("historical-figures function failed, using fallback dataset:", error.message);
       }
+
+      const remoteFigures: Figure[] = Array.isArray(data) ? data : [];
+      setFigures(withFallbackFigures(remoteFigures, maxYear));
     } catch (err) {
       console.error("Failed to fetch figures:", err);
+      setFigures(withFallbackFigures([], maxYear));
     } finally {
       setLoading(false);
     }
-  };
+  }, [maxYear]);
+
+  useEffect(() => {
+    fetchFigures();
+  }, [fetchFigures]);
 
   const aliveFigures = useMemo(() => {
     return figures
@@ -157,10 +180,9 @@ const WhoWasAlive = () => {
     if (!q) return [];
 
     return figures
-      .filter((f) => activeCategory === "All" || f.category === activeCategory)
       .filter((f) => normalizeSearch(f.name).includes(q))
       .sort((a, b) => a.birth_year - b.birth_year);
-  }, [figures, activeCategory, searchQuery]);
+  }, [figures, searchQuery]);
 
   const displayedFigures = searchQuery ? searchResults : aliveFigures;
 
@@ -208,6 +230,49 @@ const WhoWasAlive = () => {
     return null;
   }, []);
 
+  const visibleFigures = useMemo(
+    () => (mode === "explore" ? displayedFigures : challengeData?.figures ?? []),
+    [mode, displayedFigures, challengeData]
+  );
+
+  useEffect(() => {
+    const needsLookup = visibleFigures.filter(
+      (figure) => figure.image.includes("placeholder.svg") && !resolvedImageUrls[figure.id]
+    );
+
+    if (!needsLookup.length) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const nextEntries = await Promise.all(
+        needsLookup.map(async (figure) => {
+          const thumbnail = await fetchWikipediaThumbnail(figure.name);
+          return { id: figure.id, thumbnail };
+        })
+      );
+
+      if (cancelled) return;
+
+      setResolvedImageUrls((prev) => {
+        const next = { ...prev };
+        nextEntries.forEach(({ id, thumbnail }) => {
+          if (thumbnail) next[id] = thumbnail;
+        });
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visibleFigures, resolvedImageUrls, fetchWikipediaThumbnail]);
+
+  const getFigureImageSrc = useCallback(
+    (figure: Figure) => resolvedImageUrls[figure.id] || getImageUrl(figure.image),
+    [resolvedImageUrls]
+  );
+
   // Challenge mode
   const startChallenge = async () => {
     setMode("challenge");
@@ -221,16 +286,25 @@ const WhoWasAlive = () => {
     setSelectedIds(new Set());
     setChallengeScore(0);
     try {
-      const { data } = await supabase.functions.invoke("historical-figures/challenge", {
+      const { data, error } = await supabase.functions.invoke("historical-figures/challenge", {
         body: null,
         method: "GET",
       });
-      if (data) {
+      if (error) {
+        console.warn("historical-figures/challenge failed, using local challenge:", error.message);
+      }
+
+      if (data && Array.isArray((data as ChallengeData).figures)) {
         setChallengeData(data);
+        setChallengeRound((r) => r + 1);
+      } else {
+        setChallengeData(createFallbackChallenge(figures));
         setChallengeRound((r) => r + 1);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch challenge round:", err);
+      setChallengeData(createFallbackChallenge(figures));
+      setChallengeRound((r) => r + 1);
     }
   };
 
@@ -474,7 +548,7 @@ const WhoWasAlive = () => {
                   >
                     <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-3 bg-muted">
                       <img
-                        src={getImageUrl(figure.image)}
+                        src={getFigureImageSrc(figure)}
                         alt={figure.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
@@ -561,7 +635,7 @@ const WhoWasAlive = () => {
                     >
                       <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-muted">
                         <img
-                          src={getImageUrl(figure.image)}
+                          src={getFigureImageSrc(figure)}
                           alt={figure.name}
                           className="w-full h-full object-cover"
                           loading="lazy"
