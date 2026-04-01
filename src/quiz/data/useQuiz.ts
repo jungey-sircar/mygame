@@ -1,6 +1,27 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { QuizQuestion } from "./cQuestions";
 
+const shuffleArray = <T,>(items: T[]): T[] => {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const shuffleQuestionOptions = (question: QuizQuestion): QuizQuestion => {
+  const indexedOptions = question.options.map((option, index) => ({ option, index }));
+  const shuffledOptions = shuffleArray(indexedOptions);
+  const remappedCorrect = shuffledOptions.findIndex(({ index }) => index === question.correct);
+
+  return {
+    ...question,
+    options: shuffledOptions.map(({ option }) => option),
+    correct: remappedCorrect,
+  };
+};
+
 export function useQuiz(allQuestions: QuizQuestion[], count: number = 50) {
   const [selectedQuestions, setSelectedQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Map<number, boolean>>(new Map());
@@ -8,7 +29,11 @@ export function useQuiz(allQuestions: QuizQuestion[], count: number = 50) {
 
   const initQuiz = useCallback(() => {
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-    setSelectedQuestions(shuffled.slice(0, Math.min(count, shuffled.length)));
+    const randomizedQuestions = shuffled
+      .slice(0, Math.min(count, shuffled.length))
+      .map(shuffleQuestionOptions);
+
+    setSelectedQuestions(randomizedQuestions);
     setAnswers(new Map());
     setScore(0);
   }, [allQuestions, count]);
