@@ -128,6 +128,32 @@ for i in range(n):
 average = total / n
 print(average)`,
   },
+    {
+        name: 'Matrix Update',
+        language: 'python',
+        description: '2D array row updates and traversal',
+        code: `matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+row = matrix[1]
+row[2] = 42
+
+print(matrix)
+print(row)`,
+    },
+    {
+        name: 'Matrix Update',
+        language: 'c',
+        description: '2D array row updates and traversal',
+        code: `#include <stdio.h>
+
+    int main() {
+        int matrix[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        matrix[1][2] = 42;
+            printf("matrix[1][2] = %d\\n", matrix[1][2]);
+            printf("matrix[0][0] = %d\\n", matrix[0][0]);
+        return 0;
+    }`,
+    },
   {
     name: 'Functions',
     language: 'python',
@@ -1300,6 +1326,23 @@ for (let i = 0; i < n; i++) {
 
 console.log(arr)`,
   },
+    {
+        name: 'Matrix Update',
+        language: 'javascript',
+        description: '2D array update through row reference',
+        code: `let matrix = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+]
+
+let row = matrix[1]
+row[2] = 42
+
+for (let i = 0; i < matrix.length; i++) {
+        console.log(matrix[i])
+}`,
+    },
   {
     name: 'Linear Search',
     language: 'javascript',
@@ -1793,6 +1836,19 @@ for (int i = 0; i < 4; i++) {
 System.out.println(s);`,
     },
     {
+        name: 'Java Matrix Update',
+        language: 'java',
+        description: '2D array row reference update',
+        code: `int[] row1 = [1, 2, 3];
+int[] row2 = [4, 5, 6];
+int[] row3 = [7, 8, 9];
+int[] matrix = [row1, row2, row3];
+
+int[] targetRow = matrix[1];
+targetRow[2] = 42;
+System.out.println(matrix);`,
+    },
+    {
         name: 'Java Function Add',
         language: 'java',
         description: 'Top-level function style',
@@ -2194,6 +2250,19 @@ for (int i = 0; i < 4; i++) {
         s = s + arr[i];
 }
 Console.WriteLine(s);`,
+    },
+    {
+        name: '.NET Matrix Update',
+        language: 'dotnet',
+        description: '2D array row reference update',
+        code: `int[] row1 = [1, 2, 3];
+int[] row2 = [4, 5, 6];
+int[] row3 = [7, 8, 9];
+int[] matrix = [row1, row2, row3];
+
+int[] targetRow = matrix[1];
+targetRow[2] = 42;
+Console.WriteLine(matrix);`,
     },
     {
         name: '.NET Function Multiply',
@@ -2695,6 +2764,21 @@ $m[1][1] = 42;
 $v = $m[1][1];
 $v = $v + 1;
 echo($v);
+echo($m);`,
+    },
+    {
+        name: 'PHP Matrix Traverse',
+        language: 'php',
+        description: '2D array row traversal and update',
+        code: `<?php
+$m = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+$row = $m[1];
+$row[2] = 42;
+echo($row);
 echo($m);`,
     },
     {

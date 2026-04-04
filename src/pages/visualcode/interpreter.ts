@@ -630,17 +630,37 @@ class CInterpreter {
     line = line.replace(/;$/, '').trim();
 
     // Variable declaration/assignment
-    const decl = line.match(/^(int|float|double|char|long)\s+(\w+)(?:\[(.+)\])?\s*(?:=\s*(.+))?$/);
+    const decl = line.match(/^(int|float|double|char|long)\s+(\w+)(?:\[(.+?)\](?:\[(.+?)\])?)?\s*(?:=\s*(.+))?$/);
     if (decl) {
       const type = decl[1];
       const name = decl[2];
-      const arrSize = decl[3];
-      const initExpr = decl[4];
-      this.varTypes[name] = arrSize ? `${type}[]` : type;
+      const firstDim = decl[3];
+      const secondDim = decl[4];
+      const initExpr = decl[5];
+      this.varTypes[name] = firstDim ? (secondDim ? `${type}[][]` : `${type}[]`) : type;
 
-      if (arrSize !== undefined) {
-        const size = Math.max(0, Number(this.evalC(arrSize, scope)) || 0);
-        scope[name] = Array.from({ length: size }, () => 0);
+      if (firstDim !== undefined && secondDim !== undefined) {
+        const rows = Math.max(0, Number(this.evalC(firstDim, scope)) || 0);
+        const cols = Math.max(0, Number(this.evalC(secondDim, scope)) || 0);
+        if (initExpr) {
+          const normalized = this.normalizeCArrayLiteral(initExpr);
+          const raw = this.evalC(normalized, scope);
+          scope[name] = Array.isArray(raw)
+            ? raw.map((row: any) => Array.isArray(row) ? row.slice(0, cols) : Array.from({ length: cols }, () => 0))
+            : Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
+        } else {
+          scope[name] = Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
+        }
+        this.record(idx, 'assignment', `${name} = ${JSON.stringify(scope[name])}`, scope);
+      } else if (firstDim !== undefined) {
+        const size = Math.max(0, Number(this.evalC(firstDim, scope)) || 0);
+        if (initExpr) {
+          const normalized = this.normalizeCArrayLiteral(initExpr);
+          const raw = this.evalC(normalized, scope);
+          scope[name] = Array.isArray(raw) ? raw.slice(0, size) : Array.from({ length: size }, () => 0);
+        } else {
+          scope[name] = Array.from({ length: size }, () => 0);
+        }
         this.record(idx, 'assignment', `${name} = ${JSON.stringify(scope[name])}`, scope);
       } else {
         const raw = initExpr ? this.evalC(initExpr, scope) : 0;
@@ -652,6 +672,20 @@ class CInterpreter {
     }
 
     // Indexed assignment: arr[i] = value
+    const idxAssign2 = line.match(/^(\w+)\[(.+)\]\[(.+)\]\s*=\s*(.+)$/);
+    if (idxAssign2 && !line.includes('==')) {
+      const arr = scope[idxAssign2[1]];
+      const rowKey = this.evalC(idxAssign2[2], scope);
+      const colKey = this.evalC(idxAssign2[3], scope);
+      const raw = this.evalC(idxAssign2[4], scope);
+      const val = this.castCArrayValue(idxAssign2[1], raw);
+      if (Array.isArray(arr) && Array.isArray(arr[rowKey])) {
+        arr[rowKey][colKey] = val;
+        this.record(idx, 'assignment', `${idxAssign2[1]}[${rowKey}][${colKey}] = ${val}`, scope);
+        return idx + 1;
+      }
+    }
+
     const idxAssign = line.match(/^(\w+)\[(.+)\]\s*=\s*(.+)$/);
     if (idxAssign && !line.includes('==')) {
       const arr = scope[idxAssign[1]];
@@ -917,6 +951,22 @@ class CInterpreter {
     if (expr.startsWith("'") && expr.endsWith("'")) return expr.charCodeAt(1);
     if (/^\w+$/.test(expr) && expr in scope) return scope[expr];
 
+    // Array literal
+    if (expr.startsWith('[') && expr.endsWith(']')) {
+      const inner = expr.slice(1, -1).trim();
+      if (!inner) return [];
+      return this.parseCComma(inner).map(entry => this.evalC(entry, scope));
+    }
+
+    // Nested array indexing: matrix[i][j]
+    const idx2M = expr.match(/^(\w+)\[([^\]]+)\]\[([^\]]+)\]$/);
+    if (idx2M) {
+      const arr = scope[idx2M[1]];
+      const row = this.evalC(idx2M[2], scope);
+      const col = this.evalC(idx2M[3], scope);
+      return arr?.[row]?.[col] ?? 0;
+    }
+
     // Array indexing
     const idxM = expr.match(/^(\w+)\[([^\]]+)\]$/);
     if (idxM) {
@@ -956,6 +1006,10 @@ class CInterpreter {
     const t = this.varTypes[name] ?? '';
     if (t.startsWith('int') || t.startsWith('long') || t.startsWith('char')) return Math.trunc(Number(value) || 0);
     return value;
+  }
+
+  private normalizeCArrayLiteral(expr: string): string {
+    return expr.trim().replace(/\{/g, '[').replace(/\}/g, ']');
   }
 
   private preprocessCFuncs(expr: string, scope: Record<string, any>): string {
@@ -1006,8 +1060,8 @@ class CInterpreter {
     for (const ch of str) {
       if (inStr) { cur += ch; if (ch === sc) inStr = false; continue; }
       if (ch === '"') { inStr = true; sc = ch; cur += ch; continue; }
-      if (ch === '(') { depth++; cur += ch; continue; }
-      if (ch === ')') { depth--; cur += ch; continue; }
+      if (ch === '(' || ch === '[' || ch === '{') { depth++; cur += ch; continue; }
+      if (ch === ')' || ch === ']' || ch === '}') { depth--; cur += ch; continue; }
       if (ch === ',' && depth === 0) { r.push(cur.trim()); cur = ''; continue; }
       cur += ch;
     }

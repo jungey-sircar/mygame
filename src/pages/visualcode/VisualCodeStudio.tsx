@@ -58,26 +58,16 @@ echo($total);`,
 };
 
 const matrixDemoCode: Record<Language, string> = {
-  python: `matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
+  python: `matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+row = matrix[1]
+row[2] = 42
 
-n = len(matrix)
-for i in range(0, n // 2):
-    for j in range(i, n - i - 1):
-        temp = matrix[i][j]
-        matrix[i][j] = matrix[n - 1 - j][i]
-        matrix[n - 1 - j][i] = matrix[n - 1 - i][n - 1 - j]
-        matrix[n - 1 - i][n - 1 - j] = matrix[j][n - 1 - i]
-        matrix[j][n - 1 - i] = temp
-
-print(matrix)`,
-  c: `int a = 1;
-int b = 2;
-int c = 3;
-printf("%d %d %d\\n", a, b, c);`,
+print(matrix)
+print(row)`,
+  c: `int matrix[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+matrix[1][2] = 42;
+printf("matrix[1][2] = %d\\n", matrix[1][2]);
+printf("matrix[0][0] = %d\\n", matrix[0][0]);`,
   javascript: `const matrix = [
   [1, 2, 3],
   [4, 5, 6],
