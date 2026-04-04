@@ -24,9 +24,7 @@ import Footer from "@/components/Footer";
 interface TheoryMarkRecord {
   id: string;
   name: string;
-  firstTerm: number | null;
-  secondTerm: number | null;
-  preBoard: number | null;
+  marks: Record<string, number | null>;
 }
 
 interface TheoryCategory {
@@ -36,12 +34,22 @@ interface TheoryCategory {
   records: TheoryMarkRecord[];
 }
 
-type TermKey = "firstTerm" | "secondTerm" | "preBoard";
+interface ExamDefinition {
+  key: string;
+  label: string;
+}
 
 const ADMIN_USERNAME = "jungeysircar";
 const ADMIN_PASSWORD = "eric@123";
-const STORAGE_KEY = "neon-challenge-hub-theory-marks-admin-data-v2";
-const LEGACY_STORAGE_KEY = "neon-challenge-hub-theory-marks-admin-data-v1";
+const STORAGE_KEY = "neon-challenge-hub-theory-marks-admin-data-v3";
+const LEGACY_STORAGE_V2 = "neon-challenge-hub-theory-marks-admin-data-v2";
+const LEGACY_STORAGE_V1 = "neon-challenge-hub-theory-marks-admin-data-v1";
+
+const DEFAULT_EXAMS: ExamDefinition[] = [
+  { key: "first-term", label: "First Term" },
+  { key: "second-term", label: "Second Term" },
+  { key: "pre-board", label: "Pre-Board" },
+];
 
 const INITIAL_CATEGORIES: TheoryCategory[] = [
   {
@@ -49,20 +57,76 @@ const INITIAL_CATEGORIES: TheoryCategory[] = [
     title: "Management",
     subtitle: "Previous marks set",
     records: [
-      { id: "management-aarys", name: "AARYS", firstTerm: 12, secondTerm: 14, preBoard: null },
-      { id: "management-arbin", name: "ARBIN MAHARJAN", firstTerm: 20, secondTerm: 28, preBoard: 26 },
-      { id: "management-belief", name: "BELIEF BHAJI", firstTerm: 14, secondTerm: 21, preBoard: 20 },
-      { id: "management-bishal", name: "BISHAL KUMAR KUNWAR", firstTerm: 38, secondTerm: 41, preBoard: 37 },
-      { id: "management-diplove", name: "DIPLOVE THAPA", firstTerm: 24, secondTerm: 34, preBoard: 12 },
-      { id: "management-lizen", name: "LIZEN MAHARJAN", firstTerm: 22, secondTerm: 40, preBoard: 31 },
-      { id: "management-luwish", name: "LUWISH MAHARJAN", firstTerm: 21, secondTerm: 15, preBoard: 25 },
-      { id: "management-nirvik", name: "NIRVIK MAHARJAN", firstTerm: 25, secondTerm: 33, preBoard: 27 },
-      { id: "management-riz", name: "RIZ MAHARJAN", firstTerm: 15, secondTerm: 19, preBoard: 14 },
-      { id: "management-sakchhyyam", name: "SAKCHHYYAM TAMANG", firstTerm: 25, secondTerm: 30, preBoard: 28 },
-      { id: "management-shrawika", name: "SHRAWIKA MAHARJAN", firstTerm: 24, secondTerm: 25, preBoard: 20 },
-      { id: "management-shital", name: "SHITAL BAHADUR KHADKA", firstTerm: 20, secondTerm: 15, preBoard: 16 },
-      { id: "management-timila", name: "TIMILA DEVI MAHARJAN", firstTerm: 28, secondTerm: 39, preBoard: 24 },
-      { id: "management-utsav", name: "UTSAV MAHARJAN", firstTerm: 28, secondTerm: 23, preBoard: 15 },
+      {
+        id: "management-aarys",
+        name: "AARYS",
+        marks: { "first-term": 12, "second-term": 14, "pre-board": null },
+      },
+      {
+        id: "management-arbin",
+        name: "ARBIN MAHARJAN",
+        marks: { "first-term": 20, "second-term": 28, "pre-board": 26 },
+      },
+      {
+        id: "management-belief",
+        name: "BELIEF BHAJI",
+        marks: { "first-term": 14, "second-term": 21, "pre-board": 20 },
+      },
+      {
+        id: "management-bishal",
+        name: "BISHAL KUMAR KUNWAR",
+        marks: { "first-term": 38, "second-term": 41, "pre-board": 37 },
+      },
+      {
+        id: "management-diplove",
+        name: "DIPLOVE THAPA",
+        marks: { "first-term": 24, "second-term": 34, "pre-board": 12 },
+      },
+      {
+        id: "management-lizen",
+        name: "LIZEN MAHARJAN",
+        marks: { "first-term": 22, "second-term": 40, "pre-board": 31 },
+      },
+      {
+        id: "management-luwish",
+        name: "LUWISH MAHARJAN",
+        marks: { "first-term": 21, "second-term": 15, "pre-board": 25 },
+      },
+      {
+        id: "management-nirvik",
+        name: "NIRVIK MAHARJAN",
+        marks: { "first-term": 25, "second-term": 33, "pre-board": 27 },
+      },
+      {
+        id: "management-riz",
+        name: "RIZ MAHARJAN",
+        marks: { "first-term": 15, "second-term": 19, "pre-board": 14 },
+      },
+      {
+        id: "management-sakchhyyam",
+        name: "SAKCHHYYAM TAMANG",
+        marks: { "first-term": 25, "second-term": 30, "pre-board": 28 },
+      },
+      {
+        id: "management-shrawika",
+        name: "SHRAWIKA MAHARJAN",
+        marks: { "first-term": 24, "second-term": 25, "pre-board": 20 },
+      },
+      {
+        id: "management-shital",
+        name: "SHITAL BAHADUR KHADKA",
+        marks: { "first-term": 20, "second-term": 15, "pre-board": 16 },
+      },
+      {
+        id: "management-timila",
+        name: "TIMILA DEVI MAHARJAN",
+        marks: { "first-term": 28, "second-term": 39, "pre-board": 24 },
+      },
+      {
+        id: "management-utsav",
+        name: "UTSAV MAHARJAN",
+        marks: { "first-term": 28, "second-term": 23, "pre-board": 15 },
+      },
     ],
   },
   {
@@ -70,30 +134,57 @@ const INITIAL_CATEGORIES: TheoryCategory[] = [
     title: "Science Students",
     subtitle: "Uploaded from the science screenshots",
     records: [
-      { id: "science-aashraya", name: "AASHRAYA SHRESTHA", firstTerm: 20, secondTerm: 18, preBoard: 32 },
-      { id: "science-azelf", name: "AZELF MAHARJAN", firstTerm: 30, secondTerm: 29, preBoard: 29 },
-      { id: "science-bidhan", name: "BIDHAN KC", firstTerm: 31, secondTerm: 34, preBoard: 33 },
-      { id: "science-jashan", name: "JASHAN SHRESTHA", firstTerm: 48, secondTerm: 46, preBoard: 37 },
-      { id: "science-prastut", name: "PRASTUT RAUT", firstTerm: 30, secondTerm: 36, preBoard: 30 },
-      { id: "science-ram-hari", name: "RAM HARI ADHIKARI", firstTerm: 37, secondTerm: 41, preBoard: 28 },
-      { id: "science-reebik", name: "REEBIK DANGOL", firstTerm: 27, secondTerm: 36, preBoard: 32 },
-      { id: "science-saurabhdweep", name: "SAURABHDWEEP SHRESTHA", firstTerm: 31, secondTerm: 40, preBoard: 36 },
-      { id: "science-shalim", name: "SHALIM TAMANG", firstTerm: 7, secondTerm: 14, preBoard: 7 },
+      {
+        id: "science-aashraya",
+        name: "AASHRAYA SHRESTHA",
+        marks: { "first-term": 20, "second-term": 18, "pre-board": 32 },
+      },
+      {
+        id: "science-azelf",
+        name: "AZELF MAHARJAN",
+        marks: { "first-term": 30, "second-term": 29, "pre-board": 29 },
+      },
+      {
+        id: "science-bidhan",
+        name: "BIDHAN KC",
+        marks: { "first-term": 31, "second-term": 34, "pre-board": 33 },
+      },
+      {
+        id: "science-jashan",
+        name: "JASHAN SHRESTHA",
+        marks: { "first-term": 48, "second-term": 46, "pre-board": 37 },
+      },
+      {
+        id: "science-prastut",
+        name: "PRASTUT RAUT",
+        marks: { "first-term": 30, "second-term": 36, "pre-board": 30 },
+      },
+      {
+        id: "science-ram-hari",
+        name: "RAM HARI ADHIKARI",
+        marks: { "first-term": 37, "second-term": 41, "pre-board": 28 },
+      },
+      {
+        id: "science-reebik",
+        name: "REEBIK DANGOL",
+        marks: { "first-term": 27, "second-term": 36, "pre-board": 32 },
+      },
+      {
+        id: "science-saurabhdweep",
+        name: "SAURABHDWEEP SHRESTHA",
+        marks: { "first-term": 31, "second-term": 40, "pre-board": 36 },
+      },
+      {
+        id: "science-shalim",
+        name: "SHALIM TAMANG",
+        marks: { "first-term": 7, "second-term": 14, "pre-board": 7 },
+      },
     ],
   },
 ];
 
-const termColumns: Array<{ key: TermKey; label: string }> = [
-  { key: "firstTerm", label: "First Term" },
-  { key: "secondTerm", label: "Second Term" },
-  { key: "preBoard", label: "Pre-Board" },
-];
-
 const normalizeName = (value: string) => value.trim().replace(/\s+/g, " ").toUpperCase();
 const formatMark = (mark: number | null) => (mark === null ? "-" : mark);
-
-const hasAnyMark = (record: Pick<TheoryMarkRecord, "firstTerm" | "secondTerm" | "preBoard">) =>
-  [record.firstTerm, record.secondTerm, record.preBoard].some((mark) => typeof mark === "number");
 
 const createRecordId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -103,77 +194,181 @@ const createRecordId = () => {
   return `record-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 };
 
-const sanitizeRecords = (records: TheoryMarkRecord[]) =>
-  records
-    .map((record) => ({
-      id: typeof record.id === "string" && record.id ? record.id : createRecordId(),
-      name: normalizeName(record.name ?? ""),
-      firstTerm: typeof record.firstTerm === "number" ? record.firstTerm : null,
-      secondTerm: typeof record.secondTerm === "number" ? record.secondTerm : null,
-      preBoard: typeof record.preBoard === "number" ? record.preBoard : null,
-    }))
-    .filter((record) => record.name.length > 0)
-    .filter(hasAnyMark);
-
-const slugifyCategoryKey = (title: string) =>
-  title
+const slugify = (value: string, fallbackPrefix: string) => {
+  const normalized = value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-") || `category-${Date.now()}`;
+    .replace(/-+/g, "-");
 
-const loadCategories = (): TheoryCategory[] => {
+  return normalized || `${fallbackPrefix}-${Date.now()}`;
+};
+
+const hasAnyMark = (record: TheoryMarkRecord, exams: ExamDefinition[]) =>
+  exams.some((exam) => typeof record.marks[exam.key] === "number");
+
+const sanitizeExams = (candidate: ExamDefinition[] | undefined): ExamDefinition[] => {
+  if (!Array.isArray(candidate) || candidate.length === 0) return DEFAULT_EXAMS;
+
+  const seen = new Set<string>();
+  const exams = candidate
+    .map((exam) => {
+      const label = (exam?.label ?? "").trim();
+      const baseKey = typeof exam?.key === "string" && exam.key ? exam.key : slugify(label || "exam", "exam");
+      let key = baseKey;
+      let i = 1;
+      while (seen.has(key)) {
+        i += 1;
+        key = `${baseKey}-${i}`;
+      }
+      if (!label) return null;
+      seen.add(key);
+      return { key, label };
+    })
+    .filter((exam): exam is ExamDefinition => exam !== null);
+
+  return exams.length > 0 ? exams : DEFAULT_EXAMS;
+};
+
+const sanitizeRecords = (records: TheoryMarkRecord[] | unknown, exams: ExamDefinition[]): TheoryMarkRecord[] => {
+  if (!Array.isArray(records)) return [];
+
+  return records
+    .map((record) => {
+      const sourceMarks = typeof record?.marks === "object" && record?.marks !== null ? record.marks : {};
+      const marks: Record<string, number | null> = {};
+
+      exams.forEach((exam) => {
+        const value = (sourceMarks as Record<string, unknown>)[exam.key];
+        marks[exam.key] = typeof value === "number" ? value : null;
+      });
+
+      return {
+        id: typeof record?.id === "string" && record.id ? record.id : createRecordId(),
+        name: normalizeName(typeof record?.name === "string" ? record.name : ""),
+        marks,
+      };
+    })
+    .filter((record) => record.name.length > 0)
+    .filter((record) => hasAnyMark(record, exams));
+};
+
+const convertLegacyRecord = (record: unknown, exams: ExamDefinition[]): TheoryMarkRecord => {
+  const candidate = (record ?? {}) as {
+    id?: string;
+    name?: string;
+    firstTerm?: number | null;
+    secondTerm?: number | null;
+    preBoard?: number | null;
+    marks?: Record<string, number | null>;
+  };
+
+  const marks: Record<string, number | null> = {};
+  exams.forEach((exam) => {
+    marks[exam.key] = null;
+  });
+
+  const labelMap: Record<string, keyof typeof candidate> = {
+    "first-term": "firstTerm",
+    "second-term": "secondTerm",
+    "pre-board": "preBoard",
+  };
+
+  exams.forEach((exam) => {
+    const fromMarks = candidate.marks?.[exam.key];
+    if (typeof fromMarks === "number") {
+      marks[exam.key] = fromMarks;
+      return;
+    }
+
+    const legacyKey = labelMap[exam.key];
+    const fromLegacy = legacyKey ? candidate[legacyKey] : null;
+    marks[exam.key] = typeof fromLegacy === "number" ? fromLegacy : null;
+  });
+
+  return {
+    id: typeof candidate.id === "string" && candidate.id ? candidate.id : createRecordId(),
+    name: normalizeName(candidate.name ?? ""),
+    marks,
+  };
+};
+
+const buildInitialState = () => {
   if (typeof window === "undefined") {
-    return INITIAL_CATEGORIES;
+    return { exams: DEFAULT_EXAMS, categories: INITIAL_CATEGORIES };
   }
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as TheoryCategory[];
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
-          .map((category) => ({
-            key: typeof category.key === "string" && category.key ? category.key : slugifyCategoryKey(category.title || "CATEGORY"),
-            title: (category.title || "CATEGORY").trim(),
-            subtitle: (category.subtitle || "").trim(),
-            records: sanitizeRecords(Array.isArray(category.records) ? category.records : []),
-          }))
-          .filter((category) => category.title.length > 0);
+      const parsed = JSON.parse(raw) as { exams?: ExamDefinition[]; categories?: TheoryCategory[] };
+      const exams = sanitizeExams(parsed.exams);
+      const categories = Array.isArray(parsed.categories)
+        ? parsed.categories
+            .map((category) => ({
+              key:
+                typeof category?.key === "string" && category.key
+                  ? category.key
+                  : slugify(category?.title || "category", "category"),
+              title: (category?.title || "CATEGORY").trim(),
+              subtitle: (category?.subtitle || "").trim(),
+              records: sanitizeRecords(category?.records, exams),
+            }))
+            .filter((category) => category.title.length > 0)
+        : [];
+
+      if (categories.length > 0) {
+        return { exams, categories };
       }
     }
 
-    // Backward compatibility with previous storage shape.
-    const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacyRaw) {
-      const parsedLegacy = JSON.parse(legacyRaw) as { management?: TheoryMarkRecord[]; science?: TheoryMarkRecord[] };
-      return INITIAL_CATEGORIES.map((category) => ({
-        ...category,
-        records: sanitizeRecords(parsedLegacy[category.key as "management" | "science"] ?? category.records),
-      }));
+    const v2Raw = window.localStorage.getItem(LEGACY_STORAGE_V2);
+    if (v2Raw) {
+      const v2Categories = JSON.parse(v2Raw) as TheoryCategory[];
+      const exams = DEFAULT_EXAMS;
+      const categories = Array.isArray(v2Categories)
+        ? v2Categories
+            .map((category) => ({
+              key:
+                typeof category?.key === "string" && category.key
+                  ? category.key
+                  : slugify(category?.title || "category", "category"),
+              title: (category?.title || "CATEGORY").trim(),
+              subtitle: (category?.subtitle || "").trim(),
+              records: sanitizeRecords((category?.records || []).map((record) => convertLegacyRecord(record, exams)), exams),
+            }))
+            .filter((category) => category.title.length > 0)
+        : [];
+
+      if (categories.length > 0) {
+        return { exams, categories };
+      }
+    }
+
+    const v1Raw = window.localStorage.getItem(LEGACY_STORAGE_V1);
+    if (v1Raw) {
+      const v1 = JSON.parse(v1Raw) as { management?: unknown[]; science?: unknown[] };
+      const exams = DEFAULT_EXAMS;
+      return {
+        exams,
+        categories: INITIAL_CATEGORIES.map((category) => {
+          const legacyList = category.key === "management" ? v1.management : v1.science;
+          if (!Array.isArray(legacyList)) return category;
+
+          const records = sanitizeRecords(legacyList.map((record) => convertLegacyRecord(record, exams)), exams);
+          return {
+            ...category,
+            records,
+          };
+        }),
+      };
     }
   } catch {
-    return INITIAL_CATEGORIES;
+    return { exams: DEFAULT_EXAMS, categories: INITIAL_CATEGORIES };
   }
 
-  return INITIAL_CATEGORIES;
-};
-
-const buildTermStats = (records: TheoryMarkRecord[], key: TermKey) => {
-  const availableMarks = records
-    .map((record) => record[key])
-    .filter((mark): mark is number => typeof mark === "number");
-
-  const total = availableMarks.reduce((sum, mark) => sum + mark, 0);
-  const average = availableMarks.length ? (total / availableMarks.length).toFixed(1) : "0.0";
-  const topScore = availableMarks.length ? Math.max(...availableMarks) : 0;
-
-  return {
-    availableCount: availableMarks.length,
-    average,
-    topScore,
-  };
+  return { exams: DEFAULT_EXAMS, categories: INITIAL_CATEGORIES };
 };
 
 const getCategoryIcon = (key: string) => {
@@ -183,8 +378,16 @@ const getCategoryIcon = (key: string) => {
 };
 
 const TheoryMarks = () => {
-  const [categories, setCategories] = useState<TheoryCategory[]>(() => loadCategories());
-  const [selectedCategory, setSelectedCategory] = useState<string>("management");
+  const initialState = useMemo(() => buildInitialState(), []);
+  const [isPageUnlocked, setIsPageUnlocked] = useState(false);
+  const [unlockUsername, setUnlockUsername] = useState("");
+  const [unlockPassword, setUnlockPassword] = useState("");
+  const [unlockError, setUnlockError] = useState("");
+
+  const [exams, setExams] = useState<ExamDefinition[]>(initialState.exams);
+  const [categories, setCategories] = useState<TheoryCategory[]>(initialState.categories);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialState.categories[0]?.key ?? "management");
   const [query, setQuery] = useState("");
 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -193,22 +396,21 @@ const TheoryMarks = () => {
   const [adminMessage, setAdminMessage] = useState("");
   const [adminError, setAdminError] = useState("");
 
-  const [adminCategory, setAdminCategory] = useState<string>("management");
+  const [adminCategory, setAdminCategory] = useState<string>(initialState.categories[0]?.key ?? "management");
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
-  const [recordForm, setRecordForm] = useState({
-    name: "",
-    firstTerm: "",
-    secondTerm: "",
-    preBoard: "",
-  });
+  const [recordName, setRecordName] = useState("");
+  const [recordFormMarks, setRecordFormMarks] = useState<Record<string, string>>(() =>
+    Object.fromEntries(initialState.exams.map((exam) => [exam.key, ""]))
+  );
 
   const [newCategoryTitle, setNewCategoryTitle] = useState("");
   const [newCategorySubtitle, setNewCategorySubtitle] = useState("");
+  const [newExamLabel, setNewExamLabel] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
-  }, [categories]);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ exams, categories }));
+  }, [exams, categories]);
 
   useEffect(() => {
     if (!categories.some((category) => category.key === selectedCategory) && categories.length > 0) {
@@ -219,6 +421,16 @@ const TheoryMarks = () => {
       setAdminCategory(categories[0].key);
     }
   }, [categories, selectedCategory, adminCategory]);
+
+  useEffect(() => {
+    setRecordFormMarks((prev) => {
+      const next: Record<string, string> = {};
+      exams.forEach((exam) => {
+        next[exam.key] = prev[exam.key] ?? "";
+      });
+      return next;
+    });
+  }, [exams]);
 
   const activeCategory = useMemo(
     () => categories.find((category) => category.key === selectedCategory) ?? categories[0],
@@ -233,48 +445,65 @@ const TheoryMarks = () => {
     return activeRecords.filter((record) => record.name.toLowerCase().includes(normalized));
   }, [query, activeRecords]);
 
-  const termStats = useMemo(
+  const examStats = useMemo(
     () =>
-      termColumns.map((column) => ({
-        ...column,
-        ...buildTermStats(activeRecords, column.key),
-      })),
-    [activeRecords]
-  );
+      exams.map((exam) => {
+        const available = activeRecords
+          .map((record) => record.marks[exam.key])
+          .filter((mark): mark is number => typeof mark === "number");
 
-  const updateCategoryRecords = (categoryKey: string, updater: (records: TheoryMarkRecord[]) => TheoryMarkRecord[]) => {
-    setCategories((prev) =>
-      prev.map((category) =>
-        category.key === categoryKey
-          ? {
-              ...category,
-              records: sanitizeRecords(updater(category.records)),
-            }
-          : category
-      )
-    );
-  };
+        const total = available.reduce((sum, mark) => sum + mark, 0);
+        const average = available.length ? (total / available.length).toFixed(1) : "0.0";
+        const topScore = available.length ? Math.max(...available) : 0;
+
+        return {
+          key: exam.key,
+          label: exam.label,
+          availableCount: available.length,
+          average,
+          topScore,
+        };
+      }),
+    [activeRecords, exams]
+  );
 
   const resetForm = () => {
     setEditingRecordId(null);
-    setRecordForm({
-      name: "",
-      firstTerm: "",
-      secondTerm: "",
-      preBoard: "",
-    });
+    setRecordName("");
+    setRecordFormMarks(Object.fromEntries(exams.map((exam) => [exam.key, ""])));
     setAdminError("");
+  };
+
+  const updateCategoryRecords = (categoryKey: string, updater: (records: TheoryMarkRecord[]) => TheoryMarkRecord[]) => {
+    setCategories((prev) =>
+      prev.map((category) => {
+        if (category.key !== categoryKey) return category;
+
+        const nextRecords = updater(category.records)
+          .map((record) => ({
+            ...record,
+            marks: Object.fromEntries(exams.map((exam) => [exam.key, record.marks[exam.key] ?? null])),
+          }))
+          .filter((record) => record.name.trim().length > 0)
+          .filter((record) => hasAnyMark(record, exams));
+
+        return {
+          ...category,
+          records: nextRecords,
+        };
+      })
+    );
   };
 
   const startEdit = (categoryKey: string, record: TheoryMarkRecord) => {
     setEditingRecordId(record.id);
     setAdminCategory(categoryKey);
-    setRecordForm({
-      name: record.name,
-      firstTerm: record.firstTerm === null ? "" : String(record.firstTerm),
-      secondTerm: record.secondTerm === null ? "" : String(record.secondTerm),
-      preBoard: record.preBoard === null ? "" : String(record.preBoard),
-    });
+    setRecordName(record.name);
+    setRecordFormMarks(
+      Object.fromEntries(
+        exams.map((exam) => [exam.key, record.marks[exam.key] === null || record.marks[exam.key] === undefined ? "" : String(record.marks[exam.key])])
+      )
+    );
     setAdminMessage(`Editing ${record.name}`);
     setAdminError("");
   };
@@ -307,42 +536,41 @@ const TheoryMarks = () => {
       return;
     }
 
-    const name = normalizeName(recordForm.name);
-    const firstTerm = recordForm.firstTerm.trim() === "" ? null : Number(recordForm.firstTerm);
-    const secondTerm = recordForm.secondTerm.trim() === "" ? null : Number(recordForm.secondTerm);
-    const preBoard = recordForm.preBoard.trim() === "" ? null : Number(recordForm.preBoard);
-
+    const name = normalizeName(recordName);
     if (!name) {
       setAdminError("Student name is required.");
       return;
     }
 
-    if ([firstTerm, secondTerm, preBoard].some((mark) => mark !== null && Number.isNaN(mark))) {
-      setAdminError("Marks must be valid numbers.");
-      return;
+    const marks: Record<string, number | null> = {};
+    for (const exam of exams) {
+      const raw = (recordFormMarks[exam.key] ?? "").trim();
+      const parsed = raw === "" ? null : Number(raw);
+      if (parsed !== null && Number.isNaN(parsed)) {
+        setAdminError(`Invalid mark for ${exam.label}.`);
+        return;
+      }
+      marks[exam.key] = parsed;
     }
 
-    if (!hasAnyMark({ firstTerm, secondTerm, preBoard })) {
+    const candidate: TheoryMarkRecord = {
+      id: editingRecordId ?? createRecordId(),
+      name,
+      marks,
+    };
+
+    if (!hasAnyMark(candidate, exams)) {
       setAdminError("At least one exam mark is required.");
       return;
     }
 
-    const recordId = editingRecordId ?? createRecordId();
-    const nextRecord: TheoryMarkRecord = {
-      id: recordId,
-      name,
-      firstTerm,
-      secondTerm,
-      preBoard,
-    };
-
     setCategories((prev) =>
       prev.map((category) => {
-        const withoutRecord = category.records.filter((record) => record.id !== recordId);
+        const withoutRecord = category.records.filter((record) => record.id !== candidate.id);
         if (category.key === adminCategory) {
           return {
             ...category,
-            records: sanitizeRecords([...withoutRecord, nextRecord]),
+            records: [...withoutRecord, candidate],
           };
         }
 
@@ -385,7 +613,7 @@ const TheoryMarks = () => {
       return;
     }
 
-    const baseKey = slugifyCategoryKey(title);
+    const baseKey = slugify(title, "category");
     let uniqueKey = baseKey;
     let suffix = 1;
 
@@ -403,17 +631,187 @@ const TheoryMarks = () => {
     setAdminError("");
   };
 
+  const handleAddExam = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!isAdminAuthenticated) {
+      setAdminError("Please log in as admin first.");
+      return;
+    }
+
+    const label = newExamLabel.trim();
+    if (!label) {
+      setAdminError("Exam name is required.");
+      return;
+    }
+
+    const baseKey = slugify(label, "exam");
+    let uniqueKey = baseKey;
+    let suffix = 1;
+
+    while (exams.some((exam) => exam.key === uniqueKey)) {
+      suffix += 1;
+      uniqueKey = `${baseKey}-${suffix}`;
+    }
+
+    const nextExam: ExamDefinition = { key: uniqueKey, label };
+    const nextExams = [...exams, nextExam];
+    setExams(nextExams);
+
+    setCategories((prev) =>
+      prev.map((category) => ({
+        ...category,
+        records: category.records.map((record) => ({
+          ...record,
+          marks: {
+            ...record.marks,
+            [uniqueKey]: null,
+          },
+        })),
+      }))
+    );
+
+    setRecordFormMarks((prev) => ({
+      ...prev,
+      [uniqueKey]: "",
+    }));
+
+    setNewExamLabel("");
+    setAdminMessage(`Exam ${label} added.`);
+    setAdminError("");
+  };
+
+  const handleRemoveExam = (examKey: string) => {
+    if (!isAdminAuthenticated) {
+      setAdminError("Please log in as admin first.");
+      return;
+    }
+
+    if (exams.length <= 1) {
+      setAdminError("At least one exam must remain.");
+      return;
+    }
+
+    const removedExam = exams.find((exam) => exam.key === examKey);
+    const nextExams = exams.filter((exam) => exam.key !== examKey);
+
+    setExams(nextExams);
+    setCategories((prev) =>
+      prev.map((category) => ({
+        ...category,
+        records: category.records
+          .map((record) => {
+            const nextMarks = { ...record.marks };
+            delete nextMarks[examKey];
+            return {
+              ...record,
+              marks: nextMarks,
+            };
+          })
+          .filter((record) => hasAnyMark(record, nextExams)),
+      }))
+    );
+
+    setRecordFormMarks((prev) => {
+      const next = { ...prev };
+      delete next[examKey];
+      return next;
+    });
+
+    setAdminMessage(`Exam ${removedExam?.label ?? examKey} removed.`);
+    setAdminError("");
+  };
+
   const openCreateForm = () => {
     setEditingRecordId(null);
-    setRecordForm({
-      name: "",
-      firstTerm: "",
-      secondTerm: "",
-      preBoard: "",
-    });
+    setRecordName("");
+    setRecordFormMarks(Object.fromEntries(exams.map((exam) => [exam.key, ""])));
     setAdminMessage("Adding a new student.");
     setAdminError("");
   };
+
+  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (unlockUsername.trim().toLowerCase() === ADMIN_USERNAME && unlockPassword === ADMIN_PASSWORD) {
+      setIsPageUnlocked(true);
+      setIsAdminAuthenticated(true);
+      setLoginUsername(ADMIN_USERNAME);
+      setLoginPassword(unlockPassword);
+      setUnlockPassword("");
+      setUnlockError("");
+      setAdminMessage("Register unlocked.");
+      return;
+    }
+
+    setUnlockError("Invalid username or password.");
+  };
+
+  if (!isPageUnlocked) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <ParticleBackground />
+
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-[-15%] left-[-10%] w-[420px] h-[420px] bg-neon-purple/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[420px] h-[420px] bg-neon-cyan/10 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="relative z-10 px-4 sm:px-6 py-8 sm:py-12">
+          <div className="max-w-xl mx-auto glass-panel rounded-2xl border border-border/40 p-6 sm:p-8 mt-8">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <h1 className="font-display text-2xl sm:text-3xl font-black text-foreground">Theory Marks Register Locked</h1>
+              <KeyRound className="w-6 h-6 text-neon-cyan" />
+            </div>
+
+            <p className="text-sm sm:text-base text-muted-foreground mb-6">
+              Enter the authorized username and password to unlock this card.
+            </p>
+
+            <form className="space-y-4" onSubmit={handleUnlock}>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Username</label>
+                <Input
+                  value={unlockUsername}
+                  onChange={(event) => setUnlockUsername(event.target.value)}
+                  placeholder="Enter username"
+                  autoComplete="username"
+                  className="bg-background/40 border-border/40"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Password</label>
+                <Input
+                  value={unlockPassword}
+                  onChange={(event) => setUnlockPassword(event.target.value)}
+                  type="password"
+                  placeholder="Enter password"
+                  autoComplete="current-password"
+                  className="bg-background/40 border-border/40"
+                />
+              </div>
+
+              {unlockError && <p className="text-sm text-red-400">{unlockError}</p>}
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button type="submit" className="gap-2">
+                  <KeyRound className="w-4 h-4" />
+                  Unlock Register
+                </Button>
+                <Link to="/" className="inline-flex">
+                  <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto">
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Home
+                  </Button>
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -444,8 +842,7 @@ const TheoryMarks = () => {
               Classroom Theory Marks
             </h1>
             <p className="font-body text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              Choose a category first. Admin can add new categories like BIT, BCA, SEE, or Grade 9, then add students
-              and marks inside each one.
+              Choose a category first. Admin can add categories and also add or remove exams like Board Exam.
             </p>
           </div>
 
@@ -493,7 +890,7 @@ const TheoryMarks = () => {
                   <h2 className="font-display text-xl font-bold text-foreground">Admin Panel</h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Log in to add categories, add students, edit marks, or delete records. Names are stored in uppercase.
+                  Log in to add categories, add or remove exams, and manage student marks.
                 </p>
               </div>
               {isAdminAuthenticated && (
@@ -576,12 +973,48 @@ const TheoryMarks = () => {
                   </div>
                 </form>
 
-                <form className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4" onSubmit={handleRecordSave}>
+                <form className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" onSubmit={handleAddExam}>
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">New Exam</label>
+                    <Input
+                      value={newExamLabel}
+                      onChange={(event) => setNewExamLabel(event.target.value)}
+                      placeholder="BOARD EXAM"
+                      className="bg-background/40 border-border/40"
+                    />
+                  </div>
                   <div className="xl:col-span-2">
+                    <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Existing Exams</label>
+                    <div className="flex flex-wrap gap-2">
+                      {exams.map((exam) => (
+                        <span key={exam.key} className="inline-flex items-center gap-2 rounded-full border border-border/40 px-3 py-1 text-xs">
+                          {exam.label}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExam(exam.key)}
+                            className="text-red-400 hover:text-red-300"
+                            title={`Remove ${exam.label}`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-end">
+                    <Button type="submit" className="w-full gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add Exam
+                    </Button>
+                  </div>
+                </form>
+
+                <form className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" onSubmit={handleRecordSave}>
+                  <div>
                     <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Student Name</label>
                     <Input
-                      value={recordForm.name}
-                      onChange={(event) => setRecordForm((prev) => ({ ...prev, name: normalizeName(event.target.value) }))}
+                      value={recordName}
+                      onChange={(event) => setRecordName(normalizeName(event.target.value))}
                       placeholder="ENTER STUDENT NAME"
                       className="bg-background/40 border-border/40 uppercase"
                     />
@@ -600,43 +1033,28 @@ const TheoryMarks = () => {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">First Term</label>
-                    <Input
-                      value={recordForm.firstTerm}
-                      onChange={(event) => setRecordForm((prev) => ({ ...prev, firstTerm: event.target.value }))}
-                      type="number"
-                      min="0"
-                      max="50"
-                      placeholder="Optional"
-                      className="bg-background/40 border-border/40"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Second Term</label>
-                    <Input
-                      value={recordForm.secondTerm}
-                      onChange={(event) => setRecordForm((prev) => ({ ...prev, secondTerm: event.target.value }))}
-                      type="number"
-                      min="0"
-                      max="50"
-                      placeholder="Optional"
-                      className="bg-background/40 border-border/40"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Pre-Board</label>
-                    <Input
-                      value={recordForm.preBoard}
-                      onChange={(event) => setRecordForm((prev) => ({ ...prev, preBoard: event.target.value }))}
-                      type="number"
-                      min="0"
-                      max="50"
-                      placeholder="Optional"
-                      className="bg-background/40 border-border/40"
-                    />
-                  </div>
-                  <div className="xl:col-span-6 flex flex-col sm:flex-row gap-3">
+
+                  {exams.map((exam) => (
+                    <div key={exam.key}>
+                      <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">{exam.label}</label>
+                      <Input
+                        value={recordFormMarks[exam.key] ?? ""}
+                        onChange={(event) =>
+                          setRecordFormMarks((prev) => ({
+                            ...prev,
+                            [exam.key]: event.target.value,
+                          }))
+                        }
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="Optional"
+                        className="bg-background/40 border-border/40"
+                      />
+                    </div>
+                  ))}
+
+                  <div className="md:col-span-2 xl:col-span-4 flex flex-col sm:flex-row gap-3">
                     <Button type="submit" className="gap-2">
                       {editingRecordId ? <CheckCircle2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                       {editingRecordId ? "Update Student" : "Add Student"}
@@ -669,7 +1087,7 @@ const TheoryMarks = () => {
                           <div>
                             <div className="font-semibold text-foreground">{record.name}</div>
                             <div className="text-xs text-muted-foreground">
-                              F:{formatMark(record.firstTerm)} S:{formatMark(record.secondTerm)} P:{formatMark(record.preBoard)}
+                              {exams.map((exam) => `${exam.label}: ${formatMark(record.marks[exam.key] ?? null)}`).join(" | ")}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -688,9 +1106,9 @@ const TheoryMarks = () => {
                   <div className="rounded-xl border border-border/40 p-4 bg-background/20">
                     <h3 className="font-display text-base font-bold text-foreground mb-4">Admin Status</h3>
                     <div className="space-y-3 text-sm text-muted-foreground">
-                      <p>Username is locked to the provided admin account.</p>
-                      <p>You can add custom categories and manage records per category.</p>
-                      <p>Rows with all three marks empty cannot be saved.</p>
+                      <p>Admin can add/remove exams and categories.</p>
+                      <p>Rows with all exam marks empty are automatically blocked.</p>
+                      <p>Removing an exam removes that column from all categories.</p>
                     </div>
                     {adminMessage && <div className="mt-4 text-sm text-neon-cyan">{adminMessage}</div>}
                     {adminError && <div className="mt-4 text-sm text-red-400">{adminError}</div>}
@@ -700,9 +1118,9 @@ const TheoryMarks = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
-            {termStats.map((stat) => (
-              <div key={stat.label} className="glass-panel rounded-2xl p-5 border border-border/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+            {examStats.map((stat) => (
+              <div key={stat.key} className="glass-panel rounded-2xl p-5 border border-border/40">
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <h2 className="font-display text-lg font-bold text-foreground">{stat.label}</h2>
                   <Trophy className="w-5 h-5 text-neon-cyan" />
@@ -749,18 +1167,25 @@ const TheoryMarks = () => {
                 <thead className="bg-foreground/5">
                   <tr>
                     <th className="px-4 sm:px-6 py-4 font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">Name</th>
-                    <th className="px-4 sm:px-6 py-4 font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">First Term</th>
-                    <th className="px-4 sm:px-6 py-4 font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">Second Term</th>
-                    <th className="px-4 sm:px-6 py-4 font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">Pre-Board</th>
+                    {exams.map((exam) => (
+                      <th
+                        key={exam.key}
+                        className="px-4 sm:px-6 py-4 font-display text-xs uppercase tracking-[0.25em] text-muted-foreground"
+                      >
+                        {exam.label}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRecords.map((record, index) => (
                     <tr key={record.id} className={index % 2 === 0 ? "bg-background/10" : "bg-transparent"}>
                       <td className="px-4 sm:px-6 py-3 border-t border-border/30 font-semibold text-foreground">{record.name}</td>
-                      <td className="px-4 sm:px-6 py-3 border-t border-border/30 text-muted-foreground">{formatMark(record.firstTerm)}</td>
-                      <td className="px-4 sm:px-6 py-3 border-t border-border/30 text-muted-foreground">{formatMark(record.secondTerm)}</td>
-                      <td className="px-4 sm:px-6 py-3 border-t border-border/30 text-muted-foreground">{formatMark(record.preBoard)}</td>
+                      {exams.map((exam) => (
+                        <td key={`${record.id}-${exam.key}`} className="px-4 sm:px-6 py-3 border-t border-border/30 text-muted-foreground">
+                          {formatMark(record.marks[exam.key] ?? null)}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>

@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, KeyRound, Pause, Play, RotateCcw, SkipForward, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ParticleBackground from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { traceCode, type ExecutionStep, type Language } from "./interpreter";
+import { examples, type CodeExample } from "./examples";
 import {
   ALL_CATEGORY,
-  STUDIO_EXAMPLES_PER_LANGUAGE,
-  studioCategoriesByLanguage,
   studioExamplesByLanguage,
 } from "./studioExamples";
+
+const LOCK_USERNAME = "jungeysircar";
+const LOCK_PASSWORD = "eric@123";
 
 const starterCode: Record<Language, string> = {
   python: `total = 0
@@ -239,7 +242,47 @@ const computeHeatMap = (
   return heat;
 };
 
+type StudioExampleOption = {
+  name: string;
+  code: string;
+  description: string;
+  categories: string[];
+  primaryCategory: string;
+};
+
+const toStudioExampleFromLab = (example: CodeExample): StudioExampleOption => ({
+  name: example.name,
+  code: example.code,
+  description: example.description,
+  categories: ["General"],
+  primaryCategory: "General",
+});
+
+const mergeStudioAndLabExamples = (language: Language): StudioExampleOption[] => {
+  const studio = studioExamplesByLanguage[language] as StudioExampleOption[];
+  const lab = examples.filter((example) => example.language === language).map(toStudioExampleFromLab);
+  const seen = new Set<string>();
+  const merged: StudioExampleOption[] = [];
+
+  for (const example of [...studio, ...lab]) {
+    const key = example.name.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(example);
+  }
+
+  return merged;
+};
+
 const VisualCodeStudio = () => {
+  const [isPageUnlocked, setIsPageUnlocked] = useState(false);
+  const [unlockUsername, setUnlockUsername] = useState("");
+  const [unlockPassword, setUnlockPassword] = useState("");
+  const [unlockError, setUnlockError] = useState("");
+
+  const [isRunning, setIsRunning] = useState(false);
+  const [speed] = useState(1);
+
   const [language, setLanguage] = useState<Language>("python");
   const [code, setCode] = useState<string>(starterCode.python);
   const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORY);
@@ -248,9 +291,18 @@ const VisualCodeStudio = () => {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [error, setError] = useState<string>("");
   const [selectedMatrix, setSelectedMatrix] = useState<string>("");
+  const runTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const languageExamples = studioExamplesByLanguage[language];
-  const languageCategories = studioCategoriesByLanguage[language];
+  const languageExamples = useMemo(() => mergeStudioAndLabExamples(language), [language]);
+  const languageCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+    for (const example of languageExamples) {
+      for (const category of example.categories) {
+        categorySet.add(category);
+      }
+    }
+    return Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+  }, [languageExamples]);
   const filteredExamples = useMemo(
     () => selectedCategory === ALL_CATEGORY
       ? languageExamples
@@ -258,32 +310,80 @@ const VisualCodeStudio = () => {
     [languageExamples, selectedCategory]
   );
 
-  const resetTraceState = () => {
+  const resetTraceState = useCallback(() => {
+    if (runTimer.current) {
+      clearTimeout(runTimer.current);
+      runTimer.current = null;
+    }
+    setIsRunning(false);
     setSteps([]);
     setActiveStep(0);
     setError("");
-  };
+    setSelectedMatrix("");
+  }, []);
 
-  const loadCode = (nextCode: string) => {
+  const loadCode = useCallback((nextCode: string) => {
     setCode(nextCode);
     resetTraceState();
-  };
+  }, [resetTraceState]);
 
   const current = steps[activeStep] ?? null;
   const previous = activeStep > 0 ? steps[activeStep - 1] : null;
 
-  const runCode = () => {
+  const runCode = useCallback(() => {
+    if (runTimer.current) {
+      clearTimeout(runTimer.current);
+      runTimer.current = null;
+    }
+
     try {
       const traced = traceCode(code, language);
       setSteps(traced);
       setActiveStep(0);
       setError("");
+      setIsRunning(true);
     } catch (err) {
       setSteps([]);
       setActiveStep(0);
       setError(err instanceof Error ? err.message : String(err));
+      setIsRunning(false);
     }
-  };
+  }, [code, language]);
+
+  const handleStep = useCallback(() => {
+    if (steps.length === 0) {
+      try {
+        const traced = traceCode(code, language);
+        setSteps(traced);
+        setActiveStep(0);
+        setError("");
+      } catch (err) {
+        setSteps([]);
+        setActiveStep(0);
+        setError(err instanceof Error ? err.message : String(err));
+      }
+      return;
+    }
+
+    if (runTimer.current) {
+      clearTimeout(runTimer.current);
+      runTimer.current = null;
+    }
+    setIsRunning(false);
+    setActiveStep((prev) => Math.min(prev + 1, Math.max(0, steps.length - 1)));
+  }, [code, language, steps]);
+
+  const handlePause = useCallback(() => {
+    setIsRunning(false);
+    if (runTimer.current) {
+      clearTimeout(runTimer.current);
+      runTimer.current = null;
+    }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    resetTraceState();
+  }, [resetTraceState]);
 
   const variableTimeline = useMemo(() => {
     const timeline: Array<{ step: number; line: number; name: string; value: unknown }> = [];
@@ -361,7 +461,7 @@ const VisualCodeStudio = () => {
   const currentLine = current?.line ?? -1;
 
   useEffect(() => {
-    const currentLanguageExamples = studioExamplesByLanguage[language];
+    const currentLanguageExamples = mergeStudioAndLabExamples(language);
     setSelectedCategory(ALL_CATEGORY);
     const first = currentLanguageExamples[0];
     if (first) {
@@ -381,6 +481,106 @@ const VisualCodeStudio = () => {
       setSelectedExampleName("");
     }
   }, [filteredExamples, selectedExampleName]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    if (steps.length === 0) {
+      setIsRunning(false);
+      return;
+    }
+
+    if (activeStep >= steps.length - 1) {
+      setIsRunning(false);
+      return;
+    }
+
+    runTimer.current = setTimeout(() => {
+      setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }, Math.max(180, 800 / speed));
+
+    return () => {
+      if (runTimer.current) {
+        clearTimeout(runTimer.current);
+        runTimer.current = null;
+      }
+    };
+  }, [isRunning, steps.length, activeStep, speed]);
+
+  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (unlockUsername.trim().toLowerCase() === LOCK_USERNAME && unlockPassword === LOCK_PASSWORD) {
+      setIsPageUnlocked(true);
+      setUnlockPassword("");
+      setUnlockError("");
+      return;
+    }
+
+    setUnlockError("Invalid username or password.");
+  };
+
+  if (!isPageUnlocked) {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <ParticleBackground />
+
+        <div className="relative z-10 max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="glass-panel p-6 sm:p-8 border border-neon-cyan/20 rounded-2xl">
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+                Fun Code Visualization Locked
+              </h1>
+              <KeyRound className="w-6 h-6 text-neon-cyan" />
+            </div>
+
+            <p className="text-sm sm:text-base text-muted-foreground mb-6">
+              Enter the authorized username and password to unlock this workspace.
+            </p>
+
+            <form className="space-y-4" onSubmit={handleUnlock}>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Username</label>
+                <Input
+                  value={unlockUsername}
+                  onChange={(event) => setUnlockUsername(event.target.value)}
+                  placeholder="Enter username"
+                  autoComplete="username"
+                  className="bg-background/40 border-border/40"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Password</label>
+                <Input
+                  value={unlockPassword}
+                  onChange={(event) => setUnlockPassword(event.target.value)}
+                  type="password"
+                  placeholder="Enter password"
+                  autoComplete="current-password"
+                  className="bg-background/40 border-border/40"
+                />
+              </div>
+
+              {unlockError && <p className="text-sm text-red-400">{unlockError}</p>}
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button type="submit" className="gap-2">
+                  <KeyRound className="w-4 h-4" />
+                  Unlock Visualization
+                </Button>
+                <Link to="/" className="inline-flex">
+                  <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto">
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Home
+                  </Button>
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -440,18 +640,19 @@ const VisualCodeStudio = () => {
               </select>
 
               <Button size="sm" onClick={runCode} className="gap-2">
-                <Play size={12} /> Run Trace
+                <Play size={12} /> {isRunning ? "Running" : steps.length > 0 ? "Resume Trace" : "Run Trace"}
               </Button>
 
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  setSelectedExampleName("");
-                  loadCode(starterCode[language]);
-                }}
-              >
-                Reset
+              <Button size="sm" variant="secondary" onClick={handleStep} className="gap-2">
+                <SkipForward size={12} /> Step
+              </Button>
+
+              <Button size="sm" variant="secondary" onClick={handlePause} className="gap-2" disabled={!isRunning}>
+                <Pause size={12} /> Pause
+              </Button>
+
+              <Button size="sm" variant="secondary" onClick={handleReset} className="gap-2">
+                <RotateCcw size={12} /> Reset
               </Button>
 
               <Button
@@ -468,7 +669,7 @@ const VisualCodeStudio = () => {
 
             <div className="mb-3 rounded-lg border border-white/10 bg-white/5 p-2.5">
               <div className="mb-2 text-[11px] font-mono text-muted-foreground">
-                Studio examples for {language.toUpperCase()}: {languageExamples.length}/{STUDIO_EXAMPLES_PER_LANGUAGE}
+                Studio + Lab examples for {language.toUpperCase()}: {languageExamples.length} available
               </div>
               <div className="mb-2 flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-mono text-muted-foreground">Category</span>

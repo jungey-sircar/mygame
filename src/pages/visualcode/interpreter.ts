@@ -717,6 +717,7 @@ class CInterpreter {
       const val = this.evalC(cond, scope);
       // Find block
       const { blockLines, endIdx: j } = this.extractCBlock(idx, lines, line);
+      const branchHeader = this.getCBranchHeader(j, lines);
 
       if (val) {
         this.record(idx, 'condition_true', `${cond} → True`, scope);
@@ -726,41 +727,22 @@ class CInterpreter {
       }
 
       // Check for else if / else
-      if (j < lines.length) {
-        const nextLine = lines[j]?.trim() ?? '';
-        if (nextLine.startsWith('} else if') || nextLine.startsWith('else if')) {
-          const cleanLine = nextLine.replace(/^\}\s*/, '');
-          if (!val) return this.executeCLine(cleanLine, j, lines, scope);
-          // skip else if + any trailing else blocks
-          return this.skipCBranches(j, lines);
+      if (branchHeader) {
+        if (branchHeader.kind === 'else if') {
+          const cleanLine = branchHeader.headerLine.replace(/^else\s+/, '');
+          if (!val) return this.executeCLine(cleanLine, branchHeader.headerIdx, lines, scope);
+          return this.skipCBranches(branchHeader.headerIdx, lines);
         }
-        if (nextLine.startsWith('} else') || nextLine.startsWith('else')) {
-          const elseLine = nextLine.replace(/^\}\s*else\s*/, '');
-          let elseLines: string[] = [];
-          let k = j;
-          if (elseLine.includes('{') || nextLine.includes('{')) {
-            k = j + 1;
-            let d = 1;
-            while (k < lines.length && d > 0) {
-              if (lines[k].includes('}')) d--;
-              if (d <= 0) { k++; break; }
-              if (lines[k].includes('{')) d++;
-              elseLines.push(lines[k]);
-              k++;
-            }
-          } else {
-            k = j + 1;
-            elseLines = [lines[k] ?? ''];
-            k++;
-          }
-          if (!val) {
-            this.record(j, 'condition_true', 'Entering else block', scope);
-            this.executeCBlockLines(elseLines, scope);
-          }
-          return k;
+
+        const { blockLines: elseLines, endIdx: afterElse } = this.extractCBlock(branchHeader.headerIdx, lines, branchHeader.headerLine);
+        if (!val) {
+          this.record(branchHeader.headerIdx, 'condition_true', 'Entering else block', scope);
+          this.executeCBlockLines(elseLines, scope);
         }
+        return afterElse;
       }
-      return j;
+
+      return j + 1;
     }
 
     // While loop
@@ -842,10 +824,15 @@ class CInterpreter {
       if (!headerLine.includes('{')) j++;
       let d = 1;
       while (j < lines.length && d > 0) {
-        if (lines[j].includes('}')) d--;
-        if (d <= 0) { j++; break; }
-        if (lines[j].includes('{')) d++;
-        blockLines.push(lines[j]);
+        const current = lines[j];
+        if (current.includes('}')) {
+          d--;
+          if (d <= 0) {
+            break;
+          }
+        }
+        if (current.includes('{')) d++;
+        blockLines.push(current);
         j++;
       }
     } else {
@@ -853,6 +840,44 @@ class CInterpreter {
       j = idx + 2;
     }
     return { blockLines, endIdx: j };
+  }
+
+  private getCBranchHeader(idx: number, lines: string[]): { headerIdx: number; headerLine: string; kind: 'else if' | 'else' } | null {
+    const current = lines[idx]?.trim() ?? '';
+    if (current.startsWith('} else if') || current.startsWith('else if')) {
+      return {
+        headerIdx: idx,
+        headerLine: current.replace(/^\}\s*/, ''),
+        kind: 'else if',
+      };
+    }
+
+    if (current.startsWith('} else') || current.startsWith('else')) {
+      return {
+        headerIdx: idx,
+        headerLine: current.replace(/^\}\s*/, ''),
+        kind: 'else',
+      };
+    }
+
+    const next = lines[idx + 1]?.trim() ?? '';
+    if (next.startsWith('else if')) {
+      return {
+        headerIdx: idx + 1,
+        headerLine: next,
+        kind: 'else if',
+      };
+    }
+
+    if (next.startsWith('else')) {
+      return {
+        headerIdx: idx + 1,
+        headerLine: next,
+        kind: 'else',
+      };
+    }
+
+    return null;
   }
 
   private skipCBranches(idx: number, lines: string[]): number {
