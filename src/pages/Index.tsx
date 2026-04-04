@@ -207,6 +207,13 @@ const games = [
     comingSoon: true,
     animation: <CodeFlowAnim />,
   },
+  {
+    icon: "🧾",
+    title: "Theory Marks Register",
+    description: "View the uploaded first term, second term, and pre-board theory marks for the class.",
+    to: "/theory-marks",
+    animation: <PodiumAnim />,
+  },
 ];
 
 const Index = () => {

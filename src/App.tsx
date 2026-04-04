@@ -32,6 +32,7 @@ import MotivationHub from "./pages/motivation/MotivationHub";
 import TicTacToe from "./pages/TicTacToe";
 import VisualCodeLab from "./pages/visualcode/VisualCodeLab";
 import VisualCodeStudio from "./pages/visualcode/VisualCodeStudio";
+import TheoryMarks from "./pages/TheoryMarks";
 import QuizCompetition from "./pages/quiz-competition/QuizCompetition";
 import LoopArcade from "./pages/LoopArcade";
 import SpaceLaunchGame from "./pages/SubwaySurferDash";
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/tic-tac-toe" element={<TicTacToe />} />
             <Route path="/visualcode-lab" element={<VisualCodeLab />} />
             <Route path="/visualcode-studio" element={<VisualCodeStudio />} />
+            <Route path="/theory-marks" element={<TheoryMarks />} />
             <Route path="/quiz-competition" element={<QuizCompetition />} />
             <Route path="/loop-arcade" element={<LoopArcade />} />
             <Route path="/space-launch" element={<SpaceLaunchGame />} />
