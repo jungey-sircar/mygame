@@ -6,15 +6,13 @@ import ParticleBackground from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { ADMIN_PASSWORD, ADMIN_USERNAME } from "@/lib/adminCredentials";
 import { traceCode, type ExecutionStep, type Language } from "./interpreter";
 import { examples, type CodeExample } from "./examples";
 import {
   ALL_CATEGORY,
   studioExamplesByLanguage,
 } from "./studioExamples";
-
-const LOCK_USERNAME = "jungeysircar";
-const LOCK_PASSWORD = "eric@123";
 
 const starterCode: Record<Language, string> = {
   python: `total = 0
@@ -499,7 +497,7 @@ const VisualCodeStudio = () => {
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (unlockUsername.trim().toLowerCase() === LOCK_USERNAME && unlockPassword === LOCK_PASSWORD) {
+    if (unlockUsername.trim().toLowerCase() === ADMIN_USERNAME && unlockPassword === ADMIN_PASSWORD) {
       setIsPageUnlocked(true);
       setUnlockPassword("");
       setUnlockError("");

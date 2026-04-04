@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ParticleBackground from "@/components/ParticleBackground";
 import Footer from "@/components/Footer";
+import { ADMIN_PASSWORD, ADMIN_USERNAME } from "@/lib/adminCredentials";
 
 interface TheoryMarkRecord {
   id: string;
@@ -39,8 +40,6 @@ interface ExamDefinition {
   label: string;
 }
 
-const ADMIN_USERNAME = "jungeysircar";
-const ADMIN_PASSWORD = "eric@123";
 const STORAGE_KEY = "neon-challenge-hub-theory-marks-admin-data-v3";
 const LEGACY_STORAGE_V2 = "neon-challenge-hub-theory-marks-admin-data-v2";
 const LEGACY_STORAGE_V1 = "neon-challenge-hub-theory-marks-admin-data-v1";
