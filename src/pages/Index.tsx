@@ -13,7 +13,7 @@ import {
   MoneyRainAnim, DrawCircleAnim, MemoryMatchAnim, LifeProgressAnim,
   UniverseAnim, PasswordAnim, ImposterAnim, WordBingoAnim,
   NumberBingoAnim, SpeakingAnim, FlameAnim, TicTacToeAnim,
-  CodeFlowAnim, PodiumAnim,
+  CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const games = [
@@ -150,6 +150,13 @@ const games = [
     description: "Host-controlled multi-team quiz system for live events.",
     to: "/quiz-competition",
     animation: <PodiumAnim />,
+  },
+  {
+    icon: "🔢",
+    title: "Random Number Duel",
+    description: "Guess 0 to 500. Win with fewer attempts, or beat a friend in first-to-correct multiplayer.",
+    to: "/random-number-duel",
+    animation: <RandomNumberDuelAnim />,
   },
   {
     icon: "🕹️",

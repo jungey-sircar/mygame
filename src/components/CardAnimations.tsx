@@ -835,3 +835,87 @@ export const PodiumAnim = () => {
   });
   return <canvas ref={ref} className={CANVAS_CLASS} />;
 };
+
+// 25. Random Number Duel (rolling guesses + target lock)
+export const RandomNumberDuelAnim = () => {
+  const ref = useLoop((ctx, w, h, t) => {
+    const cx = w / 2;
+    const cy = h * 0.52;
+    const ringR = Math.min(w, h) * 0.28;
+
+    const target = 250 + Math.floor(Math.sin(t * 0.6) * 180);
+    const guess = Math.round(250 + Math.sin(t * 2.3) * 240);
+    const diff = Math.min(1, Math.abs(target - guess) / 250);
+
+    // Background track ring
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR, 0, TAU);
+    ctx.stroke();
+
+    // Progress ring that pulses faster as guess gets closer
+    const sweep = (1 - diff) * TAU;
+    ctx.strokeStyle = `rgba(${Math.floor(80 + (1 - diff) * 120)}, 230, 220, 0.85)`;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + sweep);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+
+    // Number strip at top
+    const stripY = h * 0.2;
+    const values = [guess - 12, guess - 4, guess, guess + 5, guess + 13].map(v => {
+      if (v < 0) return 0;
+      if (v > 500) return 500;
+      return v;
+    });
+    values.forEach((v, i) => {
+      const x = cx - 70 + i * 35;
+      const active = i === 2;
+      ctx.font = `${active ? "bold 14px" : "11px"} monospace`;
+      ctx.fillStyle = active ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.35)";
+      ctx.textAlign = "center";
+      ctx.fillText(String(v), x, stripY);
+    });
+
+    // Center readout
+    ctx.font = "bold 18px monospace";
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.textAlign = "center";
+    ctx.fillText(String(guess), cx, cy + 6);
+
+    ctx.font = "10px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.fillText(`target: ${target}`, cx, cy + 22);
+
+    // Hint text
+    const hint = guess < target ? "HIGHER" : guess > target ? "LOWER" : "LOCKED";
+    ctx.font = "bold 10px sans-serif";
+    ctx.fillStyle = hint === "LOCKED" ? "rgba(46,204,113,0.95)" : "rgba(0,220,255,0.85)";
+    ctx.fillText(hint, cx, cy + ringR + 16);
+
+    // Two player indicators at bottom
+    const turn = Math.floor(t * 1.4) % 2;
+    const p1x = cx - 40;
+    const p2x = cx + 40;
+    const py = h * 0.86;
+
+    ctx.fillStyle = turn === 0 ? "rgba(0,220,255,0.85)" : "rgba(255,255,255,0.18)";
+    ctx.beginPath();
+    ctx.roundRect(p1x - 24, py - 10, 48, 18, 5);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "bold 9px sans-serif";
+    ctx.fillText("P1", p1x, py + 3);
+
+    ctx.fillStyle = turn === 1 ? "rgba(255,110,180,0.85)" : "rgba(255,255,255,0.18)";
+    ctx.beginPath();
+    ctx.roundRect(p2x - 24, py - 10, 48, 18, 5);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.fillText("P2", p2x, py + 3);
+  });
+
+  return <canvas ref={ref} className={CANVAS_CLASS} />;
+};

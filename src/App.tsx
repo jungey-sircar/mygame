@@ -35,6 +35,7 @@ import VisualCodeStudio from "./pages/visualcode/VisualCodeStudio";
 import TheoryMarks from "./pages/TheoryMarks";
 import QuizCompetition from "./pages/quiz-competition/QuizCompetition";
 import LoopArcade from "./pages/LoopArcade";
+import RandomNumberDuel from "./pages/RandomNumberDuel";
 import SpaceLaunchGame from "./pages/SubwaySurferDash";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="/visualcode-studio" element={<VisualCodeStudio />} />
             <Route path="/theory-marks" element={<TheoryMarks />} />
             <Route path="/quiz-competition" element={<QuizCompetition />} />
+            <Route path="/random-number-duel" element={<RandomNumberDuel />} />
             <Route path="/loop-arcade" element={<LoopArcade />} />
             <Route path="/space-launch" element={<SpaceLaunchGame />} />
             <Route path="/subway-sprint" element={<SpaceLaunchGame />} />
