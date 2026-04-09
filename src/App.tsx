@@ -37,6 +37,7 @@ import QuizCompetition from "./pages/quiz-competition/QuizCompetition";
 import LoopArcade from "./pages/LoopArcade";
 import RandomNumberDuel from "./pages/RandomNumberDuel";
 import SpaceLaunchGame from "./pages/SubwaySurferDash";
+import NeuralReinforcement from "./pages/neural-reinforcement/NeuralReinforcement";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/loop-arcade" element={<LoopArcade />} />
             <Route path="/space-launch" element={<SpaceLaunchGame />} />
             <Route path="/subway-sprint" element={<SpaceLaunchGame />} />
+            <Route path="/neural-reinforcement" element={<NeuralReinforcement />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

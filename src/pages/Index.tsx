@@ -32,6 +32,13 @@ const games = [
     animation: <CodeFlowAnim />,
   },
   {
+    icon: "🧠",
+    title: "Neural Reinforcement",
+    description: "Simulates synaptic strengthening through repeated activation.",
+    to: "/neural-reinforcement",
+    animation: <NetworkAnim />,
+  },
+  {
     icon: "�",
     title: "Auction Challenge",
     description: "How much is it really worth?",
