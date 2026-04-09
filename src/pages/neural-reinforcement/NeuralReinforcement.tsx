@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, BrainCircuit, RefreshCcw } from "lucide-react";
 import ParticleBackground from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
-import NeuralVisualization from "./NeuralVisualization";
+import Neural3DVisualization from "./Neural3DVisualization";
 import {
   applyForgetting,
   createInitialNeuralCardState,
@@ -121,8 +121,8 @@ const NeuralReinforcement = () => {
 
         <section className="grid lg:grid-cols-[1.2fr_0.8fr] gap-5">
           <div className="rounded-2xl border border-cyan-300/20 bg-slate-900/50 backdrop-blur p-5 sm:p-6 space-y-4">
-            <h2 className="font-display text-xl font-bold text-cyan-100">Synaptic Graph</h2>
-            <NeuralVisualization
+            <h2 className="font-display text-xl font-bold text-cyan-100">Synaptic Graph (3D)</h2>
+            <Neural3DVisualization
               connectionStrength={neuralState.connectionStrength}
               pulseKey={pulseKey}
               isLearned={neuralState.isLearned}
