@@ -48,17 +48,18 @@ const levels: Level[] = [
 
 // ─── Animation Phases ─────────────────────────────────────────
 type AnimPhase = "idle" | "lever" | "switch" | "travel" | "freeze" | "splat" | "fadeout";
+type IllustrationTheme = "dark" | "light";
 
 // ─── SVG Sub-Components ───────────────────────────────────────
 
 /** Single stick-figure person, built from SVG primitives */
 const PersonSVG = ({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) => (
   <g transform={`translate(${x}, ${y}) scale(${scale})`}>
-    <circle cx="0" cy="-12" r="4" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <line x1="0" y1="-8" x2="0" y2="4" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-    <line x1="-5" y1="-2" x2="5" y2="-2" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-    <line x1="0" y1="4" x2="-4" y2="12" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-    <line x1="0" y1="4" x2="4" y2="12" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="0" cy="-12" r="4" fill="none" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <line x1="0" y1="-8" x2="0" y2="4" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="-5" y1="-2" x2="5" y2="-2" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="0" y1="4" x2="-4" y2="12" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="0" y1="4" x2="4" y2="12" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
   </g>
 );
 
@@ -96,11 +97,11 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Money bag */}
-          <path d="M-10,8 Q-12,-2 -6,-8 Q0,-14 6,-8 Q12,-2 10,8 Q8,14 0,14 Q-8,14 -10,8Z" fill="#f0d060" stroke="#333" strokeWidth="1.5" strokeLinejoin="round" />
-          <text x="0" y="7" fontSize="11" fontWeight="900" fill="#333" textAnchor="middle" style={{ fontFamily: "serif" }}>$</text>
+          <path d="M-10,8 Q-12,-2 -6,-8 Q0,-14 6,-8 Q12,-2 10,8 Q8,14 0,14 Q-8,14 -10,8Z" fill="#f0d060" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinejoin="round" />
+          <text x="0" y="7" fontSize="11" fontWeight="900" fill="var(--ink-1)" textAnchor="middle" style={{ fontFamily: "serif" }}>$</text>
           {/* Scattered coins */}
-          <ellipse cx="14" cy="10" rx="4" ry="3" fill="#e6c430" stroke="#333" strokeWidth="1" />
-          <ellipse cx="-14" cy="12" rx="3.5" ry="2.5" fill="#e6c430" stroke="#333" strokeWidth="1" />
+          <ellipse cx="14" cy="10" rx="4" ry="3" fill="#e6c430" stroke="var(--ink-1)" strokeWidth="1" />
+          <ellipse cx="-14" cy="12" rx="3.5" ry="2.5" fill="#e6c430" stroke="var(--ink-1)" strokeWidth="1" />
         </g>
       );
     case "painting":
@@ -127,8 +128,8 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
           <path d="M-3.5,-13 Q-4,-16 -2,-15 Q0,-17 2,-15 Q4,-16 3.5,-13 Q4,-11 3.8,-9 Q4,-8 3,-7" fill="#2a1a0f" stroke="none" />
           <path d="M-3.5,-13 Q-4,-11 -3.8,-9 Q-4,-8 -3,-7" fill="#2a1a0f" stroke="none" />
           {/* Eyes */}
-          <ellipse cx="-1.2" cy="-11.5" rx="0.8" ry="0.4" fill="#333" />
-          <ellipse cx="1.2" cy="-11.5" rx="0.8" ry="0.4" fill="#333" />
+          <ellipse cx="-1.2" cy="-11.5" rx="0.8" ry="0.4" fill="var(--ink-1)" />
+          <ellipse cx="1.2" cy="-11.5" rx="0.8" ry="0.4" fill="var(--ink-1)" />
           {/* Famous subtle smile */}
           <path d="M-1.5,-9.2 Q0,-8.5 1.5,-9.2" stroke="#8B6914" strokeWidth="0.4" fill="none" strokeLinecap="round" />
           {/* Hands folded */}
@@ -140,11 +141,11 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Building */}
-          <rect x="-8" y="-14" width="16" height="22" fill="#95a5a6" stroke="#333" strokeWidth="1.5" />
-          <rect x="-5" y="-10" width="4" height="4" fill="#3498db" stroke="#333" strokeWidth="0.5" />
-          <rect x="1" y="-10" width="4" height="4" fill="#3498db" stroke="#333" strokeWidth="0.5" />
-          <rect x="-5" y="-3" width="4" height="4" fill="#3498db" stroke="#333" strokeWidth="0.5" />
-          <rect x="1" y="-3" width="4" height="4" fill="#3498db" stroke="#333" strokeWidth="0.5" />
+          <rect x="-8" y="-14" width="16" height="22" fill="#95a5a6" stroke="var(--ink-1)" strokeWidth="1.5" />
+          <rect x="-5" y="-10" width="4" height="4" fill="#3498db" stroke="var(--ink-1)" strokeWidth="0.5" />
+          <rect x="1" y="-10" width="4" height="4" fill="#3498db" stroke="var(--ink-1)" strokeWidth="0.5" />
+          <rect x="-5" y="-3" width="4" height="4" fill="#3498db" stroke="var(--ink-1)" strokeWidth="0.5" />
+          <rect x="1" y="-3" width="4" height="4" fill="#3498db" stroke="var(--ink-1)" strokeWidth="0.5" />
           {/* Chart arrow going down */}
           <path d="M12,-8 L16,-2 L20,-10" stroke="#e74c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
         </g>
@@ -153,27 +154,27 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Worried face */}
-          <circle cx="0" cy="-4" r="10" fill="#ffeaa7" stroke="#333" strokeWidth="1.5" />
-          <circle cx="-4" cy="-6" r="1.5" fill="#333" />
-          <circle cx="4" cy="-6" r="1.5" fill="#333" />
-          <path d="M-4,2 Q0,-1 4,2" stroke="#333" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <circle cx="0" cy="-4" r="10" fill="#ffeaa7" stroke="var(--ink-1)" strokeWidth="1.5" />
+          <circle cx="-4" cy="-6" r="1.5" fill="var(--ink-1)" />
+          <circle cx="4" cy="-6" r="1.5" fill="var(--ink-1)" />
+          <path d="M-4,2 Q0,-1 4,2" stroke="var(--ink-1)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
           {/* Sweat drop */}
-          <path d="M10,-8 Q12,-12 11,-6Z" fill="#74b9ff" stroke="#333" strokeWidth="0.5" />
+          <path d="M10,-8 Q12,-12 11,-6Z" fill="#74b9ff" stroke="var(--ink-1)" strokeWidth="0.5" />
         </g>
       );
     case "embarrassment":
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Blushing face */}
-          <circle cx="0" cy="-4" r="10" fill="#ffeaa7" stroke="#333" strokeWidth="1.5" />
-          <line x1="-5" y1="-6" x2="-3" y2="-5" stroke="#333" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="-5" y1="-5" x2="-3" y2="-6" stroke="#333" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="3" y1="-6" x2="5" y2="-5" stroke="#333" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="3" y1="-5" x2="5" y2="-6" stroke="#333" strokeWidth="1.2" strokeLinecap="round" />
+          <circle cx="0" cy="-4" r="10" fill="#ffeaa7" stroke="var(--ink-1)" strokeWidth="1.5" />
+          <line x1="-5" y1="-6" x2="-3" y2="-5" stroke="var(--ink-1)" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="-5" y1="-5" x2="-3" y2="-6" stroke="var(--ink-1)" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="3" y1="-6" x2="5" y2="-5" stroke="var(--ink-1)" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="3" y1="-5" x2="5" y2="-6" stroke="var(--ink-1)" strokeWidth="1.2" strokeLinecap="round" />
           {/* Blush circles */}
           <circle cx="-6" cy="0" r="2.5" fill="#fab1a0" opacity="0.6" />
           <circle cx="6" cy="0" r="2.5" fill="#fab1a0" opacity="0.6" />
-          <path d="M-3,3 Q0,5 3,3" stroke="#333" strokeWidth="1" fill="none" strokeLinecap="round" />
+          <path d="M-3,3 Q0,5 3,3" stroke="var(--ink-1)" strokeWidth="1" fill="none" strokeLinecap="round" />
         </g>
       );
     case "you":
@@ -195,28 +196,28 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Fat body */}
-          <ellipse cx="0" cy="2" rx="8" ry="10" fill="#2c3e50" stroke="#333" strokeWidth="1.5" />
+          <ellipse cx="0" cy="2" rx="8" ry="10" fill="#2c3e50" stroke="var(--ink-1)" strokeWidth="1.5" />
           {/* Head */}
-          <circle cx="0" cy="-14" r="6" fill="#d4a574" stroke="#333" strokeWidth="1.2" />
+          <circle cx="0" cy="-14" r="6" fill="#d4a574" stroke="var(--ink-1)" strokeWidth="1.2" />
           {/* Top hat */}
-          <rect x="-5" y="-25" width="10" height="10" rx="1" fill="#1a1a2e" stroke="#333" strokeWidth="1" />
-          <rect x="-7" y="-16" width="14" height="2.5" rx="1" fill="#1a1a2e" stroke="#333" strokeWidth="1" />
+          <rect x="-5" y="-25" width="10" height="10" rx="1" fill="#1a1a2e" stroke="var(--ink-1)" strokeWidth="1" />
+          <rect x="-7" y="-16" width="14" height="2.5" rx="1" fill="#1a1a2e" stroke="var(--ink-1)" strokeWidth="1" />
           {/* Hat band */}
           <rect x="-5" y="-19" width="10" height="1.5" fill="#c8a84e" />
           {/* Eyes */}
-          <circle cx="-2" cy="-14" r="0.8" fill="#333" />
-          <circle cx="2" cy="-14" r="0.8" fill="#333" />
+          <circle cx="-2" cy="-14" r="0.8" fill="var(--ink-1)" />
+          <circle cx="2" cy="-14" r="0.8" fill="var(--ink-1)" />
           {/* Monocle */}
           <circle cx="3" cy="-14" r="2.5" fill="none" stroke="#c8a84e" strokeWidth="0.6" />
           <line x1="5.2" y1="-13" x2="7" y2="-8" stroke="#c8a84e" strokeWidth="0.5" />
           {/* Smug smile */}
-          <path d="M-2,-11 Q0,-9.5 2,-11" stroke="#333" strokeWidth="0.6" fill="none" strokeLinecap="round" />
+          <path d="M-2,-11 Q0,-9.5 2,-11" stroke="var(--ink-1)" strokeWidth="0.6" fill="none" strokeLinecap="round" />
           {/* Arms (short stubby) */}
-          <line x1="-8" y1="0" x2="-12" y2="-3" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="8" y1="0" x2="12" y2="-3" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="-8" y1="0" x2="-12" y2="-3" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="8" y1="0" x2="12" y2="-3" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
           {/* Legs */}
-          <line x1="-3" y1="11" x2="-4" y2="18" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="3" y1="11" x2="4" y2="18" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="-3" y1="11" x2="-4" y2="18" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="3" y1="11" x2="4" y2="18" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
           {/* Money sticking out of pocket */}
           <rect x="5" y="2" width="6" height="3" rx="0.5" fill="#27ae60" stroke="#1e8449" strokeWidth="0.5" />
           <text x="8" y="4.5" fontSize="2.5" fill="#fff" textAnchor="middle" fontWeight="bold">$</text>
@@ -242,9 +243,9 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
               <path d="M5,1 L8,3 L7,1 L9,1Z" fill="#e74c3c" stroke="#c0392b" strokeWidth="0.5" />
               {/* Eyes */}
               <line x1="2" y1="-3" x2="3" y2="-5" stroke="#c0392b" strokeWidth="0.5" />
-              <circle cx="3" cy="-5.5" r="0.8" fill="#333" />
+              <circle cx="3" cy="-5.5" r="0.8" fill="var(--ink-1)" />
               <line x1="-1" y1="-3" x2="-2" y2="-5" stroke="#c0392b" strokeWidth="0.5" />
-              <circle cx="-2" cy="-5.5" r="0.8" fill="#333" />
+              <circle cx="-2" cy="-5.5" r="0.8" fill="var(--ink-1)" />
               {/* Legs */}
               <line x1="-2" y1="3" x2="-3" y2="6" stroke="#c0392b" strokeWidth="0.5" />
               <line x1="0" y1="3" x2="0" y2="6" stroke="#c0392b" strokeWidth="0.5" />
@@ -257,35 +258,35 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
       return (
         <g transform={`translate(${x}, ${y})`}>
           {/* Body */}
-          <ellipse cx="0" cy="4" rx="8" ry="6" fill="#f39c12" stroke="#333" strokeWidth="1.2" />
+          <ellipse cx="0" cy="4" rx="8" ry="6" fill="#f39c12" stroke="var(--ink-1)" strokeWidth="1.2" />
           {/* Head */}
-          <circle cx="8" cy="-4" r="6" fill="#f39c12" stroke="#333" strokeWidth="1.2" />
+          <circle cx="8" cy="-4" r="6" fill="#f39c12" stroke="var(--ink-1)" strokeWidth="1.2" />
           {/* Ears */}
-          <polygon points="4,-9 6,-15 8,-9" fill="#f39c12" stroke="#333" strokeWidth="1" />
-          <polygon points="8,-9 10,-15 12,-9" fill="#f39c12" stroke="#333" strokeWidth="1" />
+          <polygon points="4,-9 6,-15 8,-9" fill="#f39c12" stroke="var(--ink-1)" strokeWidth="1" />
+          <polygon points="8,-9 10,-15 12,-9" fill="#f39c12" stroke="var(--ink-1)" strokeWidth="1" />
           {/* Inner ears */}
           <polygon points="5,-9 6,-13 7,-9" fill="#e8a0a0" stroke="none" />
           <polygon points="9,-9 10,-13 11,-9" fill="#e8a0a0" stroke="none" />
           {/* Eyes */}
-          <ellipse cx="6" cy="-5" rx="1.2" ry="1.5" fill="#2ecc71" stroke="#333" strokeWidth="0.5" />
-          <ellipse cx="10" cy="-5" rx="1.2" ry="1.5" fill="#2ecc71" stroke="#333" strokeWidth="0.5" />
-          <ellipse cx="6" cy="-5" rx="0.5" ry="1.3" fill="#333" />
-          <ellipse cx="10" cy="-5" rx="0.5" ry="1.3" fill="#333" />
+          <ellipse cx="6" cy="-5" rx="1.2" ry="1.5" fill="#2ecc71" stroke="var(--ink-1)" strokeWidth="0.5" />
+          <ellipse cx="10" cy="-5" rx="1.2" ry="1.5" fill="#2ecc71" stroke="var(--ink-1)" strokeWidth="0.5" />
+          <ellipse cx="6" cy="-5" rx="0.5" ry="1.3" fill="var(--ink-1)" />
+          <ellipse cx="10" cy="-5" rx="0.5" ry="1.3" fill="var(--ink-1)" />
           {/* Nose */}
           <polygon points="7.5,-2 8,-1 8.5,-2" fill="#e8a0a0" />
           {/* Whiskers */}
-          <line x1="2" y1="-2" x2="-3" y2="-3" stroke="#333" strokeWidth="0.4" />
-          <line x1="2" y1="-1" x2="-3" y2="0" stroke="#333" strokeWidth="0.4" />
-          <line x1="14" y1="-2" x2="19" y2="-3" stroke="#333" strokeWidth="0.4" />
-          <line x1="14" y1="-1" x2="19" y2="0" stroke="#333" strokeWidth="0.4" />
+          <line x1="2" y1="-2" x2="-3" y2="-3" stroke="var(--ink-1)" strokeWidth="0.4" />
+          <line x1="2" y1="-1" x2="-3" y2="0" stroke="var(--ink-1)" strokeWidth="0.4" />
+          <line x1="14" y1="-2" x2="19" y2="-3" stroke="var(--ink-1)" strokeWidth="0.4" />
+          <line x1="14" y1="-1" x2="19" y2="0" stroke="var(--ink-1)" strokeWidth="0.4" />
           {/* Legs */}
-          <line x1="-5" y1="9" x2="-5" y2="14" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="-2" y1="9" x2="-2" y2="14" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="2" y1="9" x2="2" y2="14" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="5" y1="9" x2="5" y2="14" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="-5" y1="9" x2="-5" y2="14" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="-2" y1="9" x2="-2" y2="14" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="2" y1="9" x2="2" y2="14" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="5" y1="9" x2="5" y2="14" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" />
           {/* Tail */}
           <path d="M-8,2 Q-14,-2 -12,-8 Q-10,-12 -8,-10" stroke="#f39c12" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M-8,2 Q-14,-2 -12,-8 Q-10,-12 -8,-10" stroke="#333" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M-8,2 Q-14,-2 -12,-8 Q-10,-12 -8,-10" stroke="var(--ink-1)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
         </g>
       );
     case "sleeping":
@@ -294,22 +295,22 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
           {Array.from({ length: 5 }, (_, i) => (
             <g key={i} transform={`translate(${(i - 2) * 16}, 0)`}>
               {/* Lying down body */}
-              <line x1="-6" y1="4" x2="6" y2="4" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="-6" y1="4" x2="6" y2="4" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
               {/* Head on pillow */}
-              <rect x="-8" y="0" width="5" height="3" rx="1" fill="#aaa" stroke="#888" strokeWidth="0.5" />
-              <circle cx="-6" cy="-1" r="3.5" fill="none" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
+              <rect x="-8" y="0" width="5" height="3" rx="1" fill="var(--ink-6)" stroke="var(--ink-4)" strokeWidth="0.5" />
+              <circle cx="-6" cy="-1" r="3.5" fill="none" stroke="var(--ink-2)" strokeWidth="1.2" strokeLinecap="round" />
               {/* Closed eyes (lines) */}
-              <line x1="-7.5" y1="-1.5" x2="-5.5" y2="-1.5" stroke="#333" strokeWidth="0.6" strokeLinecap="round" />
+              <line x1="-7.5" y1="-1.5" x2="-5.5" y2="-1.5" stroke="var(--ink-1)" strokeWidth="0.6" strokeLinecap="round" />
               {/* Sleeping mouth */}
-              <ellipse cx="-6" cy="1" rx="1" ry="0.6" fill="#333" opacity="0.4" />
+              <ellipse cx="-6" cy="1" rx="1" ry="0.6" fill="var(--ink-1)" opacity="0.4" />
               {/* Arms */}
-              <line x1="-3" y1="2" x2="-2" y2="6" stroke="#555" strokeWidth="1" strokeLinecap="round" />
+              <line x1="-3" y1="2" x2="-2" y2="6" stroke="var(--ink-2)" strokeWidth="1" strokeLinecap="round" />
               {/* Legs */}
-              <line x1="4" y1="4" x2="5" y2="7" stroke="#555" strokeWidth="1" strokeLinecap="round" />
-              <line x1="6" y1="4" x2="7" y2="7" stroke="#555" strokeWidth="1" strokeLinecap="round" />
+              <line x1="4" y1="4" x2="5" y2="7" stroke="var(--ink-2)" strokeWidth="1" strokeLinecap="round" />
+              <line x1="6" y1="4" x2="7" y2="7" stroke="var(--ink-2)" strokeWidth="1" strokeLinecap="round" />
               {/* ZZZ */}
-              <text x="-3" y="-5" fontSize="4" fill="#888" fontWeight="bold" opacity="0.7">z</text>
-              <text x="-1" y="-8" fontSize="3" fill="#888" fontWeight="bold" opacity="0.5">z</text>
+              <text x="-3" y="-5" fontSize="4" fill="var(--ink-4)" fontWeight="bold" opacity="0.7">z</text>
+              <text x="-1" y="-8" fontSize="3" fill="var(--ink-4)" fontWeight="bold" opacity="0.5">z</text>
             </g>
           ))}
         </g>
@@ -323,22 +324,22 @@ const TrackIconSVG = ({ type, x, y }: { type: string; x: number; y: number }) =>
 const TrolleySVG = () => (
   <g>
     {/* Body */}
-    <rect x="-20" y="-12" width="40" height="20" rx="3" ry="3" fill="#e74c3c" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="-20" y="-12" width="40" height="20" rx="3" ry="3" fill="#e74c3c" stroke="var(--ink-1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     {/* Roof */}
-    <path d="M-16,-12 L-12,-18 L12,-18 L16,-12" fill="#c0392b" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M-16,-12 L-12,-18 L12,-18 L16,-12" fill="#c0392b" stroke="var(--ink-1)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     {/* Windows */}
-    <rect x="-12" y="-9" width="8" height="6" rx="1" fill="#ffeaa7" stroke="#333" strokeWidth="0.8" />
-    <rect x="4" y="-9" width="8" height="6" rx="1" fill="#ffeaa7" stroke="#333" strokeWidth="0.8" />
+    <rect x="-12" y="-9" width="8" height="6" rx="1" fill="#ffeaa7" stroke="var(--ink-1)" strokeWidth="0.8" />
+    <rect x="4" y="-9" width="8" height="6" rx="1" fill="#ffeaa7" stroke="var(--ink-1)" strokeWidth="0.8" />
     {/* Headlight */}
-    <circle cx="20" cy="0" r="2.5" fill="#fdcb6e" stroke="#333" strokeWidth="1" />
+    <circle cx="20" cy="0" r="2.5" fill="#fdcb6e" stroke="var(--ink-1)" strokeWidth="1" />
     {/* Wheels */}
     <g className="trolley-wheel-left">
-      <circle cx="-10" cy="11" r="5" fill="#333" />
-      <circle cx="-10" cy="11" r="2" fill="#555" />
+      <circle cx="-10" cy="11" r="5" fill="var(--ink-1)" />
+      <circle cx="-10" cy="11" r="2" fill="var(--ink-2)" />
     </g>
     <g className="trolley-wheel-right">
-      <circle cx="10" cy="11" r="5" fill="#333" />
-      <circle cx="10" cy="11" r="2" fill="#555" />
+      <circle cx="10" cy="11" r="5" fill="var(--ink-1)" />
+      <circle cx="10" cy="11" r="2" fill="var(--ink-2)" />
     </g>
   </g>
 );
@@ -347,8 +348,8 @@ const TrolleySVG = () => (
 const LeverSVG = ({ leverPulled, animating }: { leverPulled: boolean; animating: boolean }) => (
   <g>
     {/* Lever pivot */}
-    <circle cx="200" cy="160" r="7" fill="#666" stroke="#333" strokeWidth="1.5" />
-    <circle cx="200" cy="160" r="3" fill="#888" />
+    <circle cx="200" cy="160" r="7" fill="var(--ink-3)" stroke="var(--ink-1)" strokeWidth="1.5" />
+    <circle cx="200" cy="160" r="3" fill="var(--ink-4)" />
     {/* Lever arm */}
     <motion.line
       x1="200" y1="160"
@@ -364,26 +365,26 @@ const LeverSVG = ({ leverPulled, animating }: { leverPulled: boolean; animating:
       cy="143"
       r="4"
       fill="#e74c3c"
-      stroke="#333"
+      stroke="var(--ink-1)"
       strokeWidth="1"
       animate={{ cx: leverPulled ? 183 : 217 }}
       transition={animating ? { duration: 0.4, ease: [0.25, 1.4, 0.5, 1] } : { duration: 0 }}
     />
-    <text x="200" y="180" fontSize="8" fill="#999" textAnchor="middle" style={{ fontFamily: "'Caveat', cursive" }}>lever</text>
+    <text x="200" y="180" fontSize="8" fill="var(--ink-5)" textAnchor="middle" style={{ fontFamily: "'Caveat', cursive" }}>lever</text>
 
     {/* Operator stick figure */}
     <g transform="translate(210, 195)">
-      <circle cx="0" cy="0" r="5" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="0" y1="5" x2="0" y2="20" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="0" cy="0" r="5" fill="none" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="0" y1="5" x2="0" y2="20" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
       <motion.line
         x1="-6" y1="12" x2="-10" y2="-28"
-        stroke="#555" strokeWidth="1.5" strokeLinecap="round"
+        stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round"
         animate={animating && leverPulled ? { x2: [-10, -12, -10] } : {}}
         transition={{ duration: 0.3 }}
       />
-      <line x1="6" y1="12" x2="10" y2="17" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="0" y1="20" x2="-5" y2="28" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="0" y1="20" x2="5" y2="28" stroke="#555" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="6" y1="12" x2="10" y2="17" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="0" y1="20" x2="-5" y2="28" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="0" y1="20" x2="5" y2="28" stroke="var(--ink-2)" strokeWidth="1.5" strokeLinecap="round" />
     </g>
   </g>
 );
@@ -427,7 +428,7 @@ const SplatSVG = ({ x, y }: { x: number; y: number }) => {
         <path
           d="M0,-28 C10,-30 18,-24 22,-16 C28,-10 30,-2 26,6 C30,14 24,22 16,26 C10,30 2,32 -6,28 C-14,30 -22,24 -26,16 C-30,10 -28,2 -24,-6 C-28,-14 -22,-24 -14,-28 C-8,-32 -2,-30 0,-28Z"
           fill="white"
-          stroke="#333"
+          stroke="var(--ink-1)"
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -443,7 +444,7 @@ const SplatSVG = ({ x, y }: { x: number; y: number }) => {
               y1={Math.sin(rad) * 18}
               x2={Math.cos(rad) * len}
               y2={Math.sin(rad) * len}
-              stroke="#333"
+              stroke="var(--ink-1)"
               strokeWidth="1.5"
               strokeLinecap="round"
             />
@@ -451,7 +452,7 @@ const SplatSVG = ({ x, y }: { x: number; y: number }) => {
         })}
         {/* SPLAT text */}
         <text
-          x="0" y="6" fontSize="13" fontWeight="900" fill="#333" textAnchor="middle"
+          x="0" y="6" fontSize="13" fontWeight="900" fill="var(--ink-1)" textAnchor="middle"
           style={{ fontFamily: "'Comic Sans MS', 'Caveat', cursive" }}
         >
           SPLAT
@@ -463,7 +464,7 @@ const SplatSVG = ({ x, y }: { x: number; y: number }) => {
         <motion.circle
           key={p.id}
           cx={x} cy={y} r={p.size}
-          fill="#333"
+          fill="var(--ink-1)"
           initial={{ opacity: 1, cx: x, cy: y }}
           animate={{ cx: x + p.dx, cy: y + p.dy, opacity: 0, scale: 0.2 }}
           transition={{ duration: 0.5, delay: p.delay, ease: "easeOut" }}
@@ -477,17 +478,17 @@ const SplatSVG = ({ x, y }: { x: number; y: number }) => {
 const TracksSVG = ({ switched }: { switched: boolean }) => (
   <g>
     {/* Main approach track */}
-    <path d="M30,140 L195,140" stroke="#333" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
+    <path d="M30,140 L195,140" stroke="var(--ink-1)" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
     {/* Sleepers / ties */}
     {[60, 90, 120, 150, 180].map((tx) => (
-      <line key={tx} x1={tx} y1="136" x2={tx} y2="144" stroke="#555" strokeWidth="2" strokeLinecap="round" />
+      <line key={tx} x1={tx} y1="136" x2={tx} y2="144" stroke="var(--ink-2)" strokeWidth="2" strokeLinecap="round" />
     ))}
 
     {/* Upper fork (pull lever path) with curve */}
-    <path d="M200,140 Q240,130 280,100 L370,70" stroke="#333" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
+    <path d="M200,140 Q240,130 280,100 L370,70" stroke="var(--ink-1)" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
 
     {/* Lower fork (do nothing path) with curve */}
-    <path d="M200,140 Q240,150 280,168 L370,185" stroke="#333" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
+    <path d="M200,140 Q240,150 280,168 L370,185" stroke="var(--ink-1)" strokeWidth="3" strokeDasharray="8,4" fill="none" strokeLinecap="round" />
 
     {/* Junction switch indicator */}
     <motion.path
@@ -510,6 +511,7 @@ const TrolleyIllustration = ({
   rightVictimCount,
   leftIcon,
   rightIcon,
+  theme,
 }: {
   phase: AnimPhase;
   pulled: boolean | null;
@@ -517,6 +519,7 @@ const TrolleyIllustration = ({
   rightVictimCount: number;
   leftIcon?: string;
   rightIcon?: string;
+  theme: IllustrationTheme;
 }) => {
   const isMoving = ["travel", "freeze", "splat"].includes(phase);
   const showSplat = ["splat", "fadeout"].includes(phase);
@@ -540,7 +543,15 @@ const TrolleyIllustration = ({
       viewBox="0 0 420 240"
       width="100%"
       className="max-w-lg mx-auto block"
-      style={{ fontFamily: "'Comic Sans MS', 'Caveat', cursive" }}
+      style={{
+        fontFamily: "'Comic Sans MS', 'Caveat', cursive",
+        ["--ink-1" as string]: theme === "dark" ? "#D8DEE9" : "#333",
+        ["--ink-2" as string]: theme === "dark" ? "#B8C1CC" : "#555",
+        ["--ink-3" as string]: theme === "dark" ? "#9AA6B2" : "#666",
+        ["--ink-4" as string]: theme === "dark" ? "#AEB8C2" : "#888",
+        ["--ink-5" as string]: theme === "dark" ? "#C6CED8" : "#999",
+        ["--ink-6" as string]: theme === "dark" ? "#BFC8D2" : "#aaa",
+      }}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -644,6 +655,7 @@ const TrolleySimulator = () => {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [pulled, setPulled] = useState<boolean | null>(null);
   const [finished, setFinished] = useState(false);
+  const [illustrationTheme, setIllustrationTheme] = useState<IllustrationTheme>("dark");
 
   const level = levels[currentLevel];
 
@@ -692,22 +704,22 @@ const TrolleySimulator = () => {
 
   if (finished) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6" style={{ fontFamily: "'Caveat', 'Comic Sans MS', cursive, sans-serif" }}>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6" style={{ fontFamily: "'Caveat', 'Comic Sans MS', cursive, sans-serif" }}>
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg w-full text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">Simulation Complete</h1>
-          <div className="w-24 h-1 bg-gray-300 mx-auto my-6 rounded" />
-          <div className="space-y-4 text-lg text-gray-700 mb-8">
-            <p>You pulled the lever <strong className="text-red-500">{pullCount}</strong> times.</p>
-            <p>You did nothing <strong className="text-gray-500">{nothingCount}</strong> times.</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-50 mb-2">Simulation Complete</h1>
+          <div className="w-24 h-1 bg-slate-700 mx-auto my-6 rounded" />
+          <div className="space-y-4 text-lg text-slate-200 mb-8">
+            <p>You pulled the lever <strong className="text-rose-400">{pullCount}</strong> times.</p>
+            <p>You did nothing <strong className="text-slate-300">{nothingCount}</strong> times.</p>
             <p>Lever usage: <strong>{pullPercent}%</strong></p>
           </div>
-          <div className="py-6 px-8 border-2 border-dashed border-gray-400 rounded-xl mb-8">
-            <p className="text-sm text-gray-500 uppercase tracking-widest mb-1">Your moral archetype</p>
-            <p className="text-3xl font-bold text-gray-800">{getLabel()}</p>
+          <div className="py-6 px-8 border-2 border-dashed border-slate-600 bg-slate-900 rounded-xl mb-8">
+            <p className="text-sm text-slate-400 uppercase tracking-widest mb-1">Your moral archetype</p>
+            <p className="text-3xl font-bold text-slate-50">{getLabel()}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button onClick={restart} className="px-6 py-3 border-2 border-gray-800 text-gray-800 rounded-lg hover:bg-gray-100 transition-colors text-lg">🔄 Restart Simulation</button>
-            <button onClick={() => navigate("/")} className="px-6 py-3 border-2 border-gray-400 text-gray-500 rounded-lg hover:bg-gray-50 transition-colors text-lg">⬅ Back to Arena</button>
+            <button onClick={restart} className="px-6 py-3 border-2 border-slate-200 text-slate-50 rounded-lg hover:bg-slate-800 transition-colors text-lg">🔄 Restart Simulation</button>
+            <button onClick={() => navigate("/")} className="px-6 py-3 border-2 border-slate-500 text-slate-300 rounded-lg hover:bg-slate-900 transition-colors text-lg">⬅ Back to Arena</button>
           </div>
         </motion.div>
       </div>
@@ -715,7 +727,7 @@ const TrolleySimulator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 md:p-8" style={{ fontFamily: "'Caveat', 'Comic Sans MS', cursive, sans-serif" }}>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 md:p-8" style={{ fontFamily: "'Caveat', 'Comic Sans MS', cursive, sans-serif" }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentLevel}
@@ -723,51 +735,65 @@ const TrolleySimulator = () => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.35 }}
-          className="max-w-2xl w-full"
+          className="max-w-2xl w-full bg-slate-900/70 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-2xl"
         >
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Trolley Problems</h1>
-            <p className="text-lg text-gray-500 mt-1">Level {currentLevel + 1}: {level.name}</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-50 tracking-tight">Trolley Problems</h1>
+            <p className="text-lg text-slate-300 mt-1">Level {currentLevel + 1}: {level.name}</p>
             <div className="flex justify-center gap-1 mt-3">
               {levels.map((_, i) => (
-                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i < currentLevel ? "bg-gray-800" : i === currentLevel ? "bg-red-400" : "bg-gray-200"}`} />
+                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i < currentLevel ? "bg-slate-100" : i === currentLevel ? "bg-rose-400" : "bg-slate-700"}`} />
               ))}
+            </div>
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={() => setIllustrationTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+                className="px-4 py-2 text-sm border border-slate-500 text-slate-100 rounded-lg bg-slate-800/70 hover:bg-slate-700/80 transition-colors"
+                aria-label="Toggle illustration theme"
+              >
+                Mode: {illustrationTheme === "dark" ? "Dark" : "Light"}
+              </button>
             </div>
           </div>
 
           {/* SVG Illustration */}
-          <TrolleyIllustration
-            phase={phase}
-            pulled={pulled}
-            leftVictimCount={level.leftVictims}
-            rightVictimCount={level.rightVictims}
-            leftIcon={level.leftIcon}
-            rightIcon={level.rightIcon}
-          />
+          <div
+            className={`rounded-xl p-2 md:p-3 shadow-inner border ${illustrationTheme === "dark" ? "border-slate-600 bg-slate-900" : "border-slate-300 bg-slate-100"}`}
+          >
+            <TrolleyIllustration
+              phase={phase}
+              pulled={pulled}
+              leftVictimCount={level.leftVictims}
+              rightVictimCount={level.rightVictims}
+              leftIcon={level.leftIcon}
+              rightIcon={level.rightIcon}
+              theme={illustrationTheme}
+            />
+          </div>
 
           {/* Track labels */}
-          <div className="flex justify-between max-w-md mx-auto mt-2 px-4 text-sm text-gray-500">
+          <div className="flex justify-between max-w-md mx-auto mt-3 px-4 text-sm text-slate-300">
             <div className="text-center">
               <span className="text-xs uppercase tracking-wide">Pull lever →</span><br />
-              <span className="font-semibold text-gray-700">{level.rightLabel}</span>
+              <span className="font-semibold text-slate-100">{level.rightLabel}</span>
               {level.debatable && (level.debatable === "right" || level.debatable === "both") && (
-                <span className="text-red-400 text-xs ml-1">(Debatable)</span>
+                <span className="text-rose-400 text-xs ml-1">(Debatable)</span>
               )}
             </div>
             <div className="text-center">
               <span className="text-xs uppercase tracking-wide">Do nothing →</span><br />
-              <span className="font-semibold text-gray-700">{level.leftLabel}</span>
+              <span className="font-semibold text-slate-100">{level.leftLabel}</span>
               {level.debatable && (level.debatable === "left" || level.debatable === "both") && (
-                <span className="text-red-400 text-xs ml-1">(Debatable)</span>
+                <span className="text-rose-400 text-xs ml-1">(Debatable)</span>
               )}
             </div>
           </div>
 
           {/* Scenario text */}
           <div className="text-center mt-6 px-4">
-            <p className="text-lg md:text-xl text-gray-700 leading-relaxed">{level.scenario}</p>
-            {level.note && <p className="text-sm text-gray-400 mt-2 italic">{level.note}</p>}
+            <p className="text-lg md:text-xl text-slate-100 leading-relaxed">{level.scenario}</p>
+            {level.note && <p className="text-sm text-slate-300 mt-2 italic">{level.note}</p>}
           </div>
 
           {/* Action buttons */}
@@ -775,14 +801,14 @@ const TrolleySimulator = () => {
             <button
               onClick={() => handleChoice(true)}
               disabled={phase !== "idle"}
-              className="px-8 py-4 border-2 border-gray-800 text-gray-800 rounded-xl hover:bg-gray-100 transition-all text-xl disabled:opacity-40 hover:scale-105 active:scale-95"
+              className="px-8 py-4 border-2 border-rose-400 text-rose-200 bg-rose-900/20 rounded-xl hover:bg-rose-900/40 transition-all text-xl disabled:opacity-40 hover:scale-105 active:scale-95"
             >
               🔀 Pull the lever
             </button>
             <button
               onClick={() => handleChoice(false)}
               disabled={phase !== "idle"}
-              className="px-8 py-4 border-2 border-gray-400 text-gray-500 rounded-xl hover:bg-gray-50 transition-all text-xl disabled:opacity-40 hover:scale-105 active:scale-95"
+              className="px-8 py-4 border-2 border-slate-400 text-slate-100 bg-slate-800/60 rounded-xl hover:bg-slate-700/80 transition-all text-xl disabled:opacity-40 hover:scale-105 active:scale-95"
             >
               😐 Do nothing
             </button>
@@ -794,3 +820,5 @@ const TrolleySimulator = () => {
 };
 
 export default TrolleySimulator;
+
+

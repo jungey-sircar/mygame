@@ -40,6 +40,12 @@ interface ExamDefinition {
   label: string;
 }
 
+interface PresentationLotteryGroup {
+  id: string;
+  members: string[];
+  topicLines: string[];
+}
+
 const STORAGE_KEY = "neon-challenge-hub-theory-marks-admin-data-v3";
 const LEGACY_STORAGE_V2 = "neon-challenge-hub-theory-marks-admin-data-v2";
 const LEGACY_STORAGE_V1 = "neon-challenge-hub-theory-marks-admin-data-v1";
@@ -49,6 +55,92 @@ const DEFAULT_EXAMS: ExamDefinition[] = [
   { key: "second-term", label: "Second Term" },
   { key: "pre-board", label: "Pre-Board" },
 ];
+
+const PRESENTATION_GROUP_SIZE = 3;
+const LOCKED_PRESENTATION_TRIO = ["SHRAWIKA MAHARJAN", "TIMILA DEVI MAHARJAN", "JASHAN SHRESTHA"];
+const PRESET_PRESENTATION_GROUPS: PresentationLotteryGroup[] = [
+  {
+    id: "presentation-group-1",
+    members: ["RAM HARI ADHIKARI", "BIDHAN KC", "AASHRAYA SHRESTHA"],
+    topicLines: [
+      "Operators & Expressions",
+      "Arithmetic",
+      "Relational",
+      "Logical",
+      "Assignment",
+      "Unary",
+      "Conditional",
+    ],
+  },
+  {
+    id: "presentation-group-2",
+    members: ["SAURABHDWEEP SHRESTHA", "REEBIK DANGOL"],
+    topicLines: ["Arrays", "1D arrays", "2D arrays", "Matrix operations"],
+  },
+  {
+    id: "presentation-group-3",
+    members: ["AZELF MAHARJAN", "PRASTUT RAUT", "SHALIM TAMANG"],
+    topicLines: [
+      "Topic: Computer Architecture & Hardware",
+      "Input/output devices",
+      "CPU, memory, storage, cpu scheduling algorithms",
+      "Microprocessor basics",
+      "Bus system",
+    ],
+  },
+  {
+    id: "presentation-group-4",
+    members: ["AARYS MAHARJAN", "SHITAL BAHADUR KHADKA", "ARBIN MAHARJAN"],
+    topicLines: [
+      "Preprocessor & Header Files",
+      "#include, #define",
+      "Standard libraries",
+      "11. Tokens in C",
+      "Keywords",
+      "Identifiers",
+      "Constants",
+      "Operators",
+      "12. Data Types & Variables",
+      "int, float, char, double",
+      "Variables & constants",
+      "Type specifiers",
+    ],
+  },
+  {
+    id: "presentation-group-5",
+    members: ["BELIEF SHAHI", "DIPLOVE THAPA", "UTSAV MAHARJAN"],
+    topicLines: [
+      "Definition of software",
+      "Types: System, Utility, Application",
+      "OS introduction, role, functions",
+      "Multiprocessing, multitasking",
+    ],
+  },
+  {
+    id: "presentation-group-6",
+    members: ["LUWISH MAHARJAN", "LIZEN MAHARJAN", "RIZ MAHARJAN"],
+    topicLines: [
+      "HTML basics & structure, navbar",
+      "CSS (inline, internal, external), DNS",
+      "Web concepts (browser, hosting, domain)",
+    ],
+  },
+  {
+    id: "presentation-group-7",
+    members: ["NIRVIK MAHARJAN", "SAKCHHYYAM TAMANG", "BISHAL KUMAR KUNWAR"],
+    topicLines: [
+      "Programming languages (low/high level)",
+      "Compiler vs Interpreter",
+      "Errors (syntax, semantic, runtime)",
+      "Algorithm, flowchart, pseudocode",
+    ],
+  },
+  {
+    id: "presentation-group-8",
+    members: ["JASHAN SHRESTHA", "SHRAWIKA MAHARJAN", "TIMILA MAHARJAN"],
+    topicLines: ["Strings", "Definition (character arrays)", "Functions:", "strlen()", "strcat()", "strcmp()", "strcpy()", "strrev()"],
+  },
+] as const;
 
 const INITIAL_CATEGORIES: TheoryCategory[] = [
   {
@@ -376,6 +468,22 @@ const getCategoryIcon = (key: string) => {
   return <BookOpen className="w-5 h-5 text-neon-cyan" />;
 };
 
+const buildPresentationLottery = (categories: TheoryCategory[]) => {
+  const roster = categories.flatMap((category) => category.records.map((record) => normalizeName(record.name)));
+  const uniqueRoster = Array.from(new Set(roster));
+  const groups = PRESET_PRESENTATION_GROUPS;
+  const usedStudents = new Set(groups.flatMap((group) => group.members.map((member) => normalizeName(member))));
+  const spareStudents = uniqueRoster
+    .filter((student) => !usedStudents.has(student))
+    .sort((left, right) => left.localeCompare(right));
+
+  return {
+    groups,
+    spareStudents,
+    totalStudents: uniqueRoster.length,
+  };
+};
+
 const TheoryMarks = () => {
   const initialState = useMemo(() => buildInitialState(), []);
   const [isPageUnlocked, setIsPageUnlocked] = useState(false);
@@ -405,6 +513,7 @@ const TheoryMarks = () => {
   const [newCategoryTitle, setNewCategoryTitle] = useState("");
   const [newCategorySubtitle, setNewCategorySubtitle] = useState("");
   const [newExamLabel, setNewExamLabel] = useState("");
+  const [presentationLottery, setPresentationLottery] = useState<ReturnType<typeof buildPresentationLottery> | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -718,6 +827,17 @@ const TheoryMarks = () => {
     });
 
     setAdminMessage(`Exam ${removedExam?.label ?? examKey} removed.`);
+    setAdminError("");
+  };
+
+  const handleGeneratePresentationLottery = () => {
+    const lottery = buildPresentationLottery(categories);
+    setPresentationLottery(lottery);
+    setAdminMessage(
+      lottery.spareStudents.length > 0
+        ? `Presentation lottery generated with ${lottery.spareStudents.length} spare student${lottery.spareStudents.length === 1 ? "" : "s"}.`
+        : "Presentation lottery generated."
+    );
     setAdminError("");
   };
 
@@ -1140,6 +1260,87 @@ const TheoryMarks = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="glass-panel rounded-2xl p-5 sm:p-6 mb-6 border border-border/40">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-5 h-5 text-neon-pink" />
+                  <h2 className="font-display text-xl font-bold text-foreground">Presentation Lottery</h2>
+                </div>
+                <p className="text-sm text-muted-foreground max-w-3xl">
+                  Generate the exact class groups and presentation topics from your screenshot.
+                </p>
+              </div>
+              <div className="flex items-end w-full lg:w-auto">
+                <Button type="button" className="w-full gap-2 sm:w-auto" onClick={handleGeneratePresentationLottery}>
+                  <Users className="w-4 h-4" />
+                  Draw Lottery
+                </Button>
+              </div>
+            </div>
+
+            {presentationLottery ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <span>{presentationLottery.totalStudents} students total</span>
+                  <span>{presentationLottery.groups.length} presentation groups</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {presentationLottery.groups.map((group, index) => (
+                    <div key={group.id} className="rounded-xl border border-border/40 bg-background/20 p-4 shadow-[0_0_24px_rgba(0,0,0,0.12)]">
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <h3 className="font-display text-base font-bold text-foreground">Group {index + 1}</h3>
+                        {index === 0 && (
+                          <span className="px-2 py-1 rounded-full bg-neon-pink/15 text-neon-pink text-[11px] font-display font-bold uppercase tracking-[0.18em]">
+                            Fixed trio
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {group.members.map((member) => (
+                          <span key={member} className="rounded-full border border-border/40 bg-background/40 px-3 py-1 text-sm text-foreground">
+                            {member}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="rounded-lg border border-neon-cyan/20 bg-neon-cyan/5 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-1">Presentation topic</div>
+                        <div className="space-y-1 font-semibold text-foreground leading-relaxed">
+                          {group.topicLines.map((line) => (
+                            <div key={line}>{line}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {presentationLottery.spareStudents.length > 0 && (
+                  <div className="rounded-xl border border-amber-400/25 bg-amber-400/8 p-4">
+                    <div className="text-[11px] uppercase tracking-[0.22em] text-amber-200 mb-2">Spare students</div>
+                    <div className="flex flex-wrap gap-2">
+                      {presentationLottery.spareStudents.map((student) => (
+                        <span key={student} className="rounded-full border border-amber-400/25 bg-background/30 px-3 py-1 text-sm text-foreground">
+                          {student}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      These students were left after making groups of three. You can merge them into the nearest group if needed.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border/30 bg-background/15 p-4 text-sm text-muted-foreground">
+                Draw the lottery to create the presentation groups.
+              </div>
+            )}
           </div>
 
           <div className="glass-panel rounded-2xl p-4 sm:p-6 mb-6 border border-border/40">
