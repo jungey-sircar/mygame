@@ -23,7 +23,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
   }
 
   return (
-    <div className="h-screen flex bg-[hsl(220,25%,4%)] relative overflow-hidden">
+    <div className="h-screen flex flex-col md:flex-row bg-[hsl(220,25%,4%)] relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-neon-purple/10 rounded-full blur-[150px]" />
@@ -33,7 +33,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
       {/* Main display area */}
       <div className="flex-1 flex flex-col relative z-10">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10">
           <div className="flex items-center gap-3">
             <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => state.setView('host')}>
               <ArrowLeft size={14} /> Host
@@ -77,7 +77,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
         </div>
 
         {/* Question area */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
           <AnimatePresence mode="wait">
             {state.showQuestion && currentQuestion ? (
               <motion.div
@@ -91,7 +91,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
                   {currentQuestion.category}
                 </span>
 
-                <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight">
+                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight">
                   {currentQuestion.text}
                 </h2>
 
@@ -111,7 +111,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
                   )}
                 </AnimatePresence>
 
-                <div className="flex gap-3 justify-center mt-8">
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
                   <Button size="lg" variant="secondary" onClick={state.toggleShowAnswer} className="gap-2">
                     {state.showAnswer ? <EyeOff size={16} /> : <Eye size={16} />}
                     {state.showAnswer ? 'Hide Answer' : 'Reveal Answer'}
@@ -160,13 +160,13 @@ const DisplayView = ({ state }: DisplayViewProps) => {
 
       {/* Side panel: Question selector */}
       {showPanel && (
-        <div className="w-80 border-l border-white/10 bg-background/90 backdrop-blur-xl flex flex-col relative z-10 overflow-hidden">
+        <div className="w-full md:w-80 md:border-l border-t md:border-t-0 border-white/10 bg-background/90 backdrop-blur-xl flex flex-col relative z-10 overflow-hidden">
           <div className="px-3 py-2 border-b border-white/10">
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Questions</p>
           </div>
 
           {/* Category filter */}
-          <div className="px-3 py-2 border-b border-white/10 flex flex-wrap gap-1 max-h-24 overflow-auto">
+          <div className="px-3 py-2 border-b border-white/10 flex gap-1 max-h-24 overflow-x-auto md:overflow-auto flex-nowrap md:flex-wrap">
             <button
               onClick={() => state.setCategory('All')}
               className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors
@@ -178,7 +178,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
               <button
                 key={cat}
                 onClick={() => state.setCategory(cat)}
-                className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors
+                className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors flex-shrink-0 whitespace-nowrap
                   ${state.selectedCategory === cat ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30' : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'}`}
               >
                 {cat}
@@ -188,7 +188,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
 
           {/* Questions grid - numbered tiles */}
           <div className="flex-1 overflow-auto p-3">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {state.filteredQuestions.map((q: any, i: number) => {
                 const displayNumber = state.selectedCategory === 'All'
                   ? (idToOrdinal.get(q.id) ?? (i + 1))
