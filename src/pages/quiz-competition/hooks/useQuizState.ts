@@ -69,16 +69,22 @@ function loadState(): QuizState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Merge any new questions from sampleQuestions that aren't in saved state
-      const savedQuestions: Question[] = (parsed.questions || []).map((q: Question) => ({ ...q, used: false }));
-      const savedIds = new Set(savedQuestions.map((q: Question) => q.id));
-      const freshQuestions = sampleQuestions
-        .filter(q => !savedIds.has(q.id))
-        .map(q => ({ ...q, used: false }));
+      // Rebuild from the current source of truth so newly added questions show up immediately.
+      // Preserve only the used state for questions that still exist in sampleQuestions.
+      const savedQuestionsById = new Map<string, Question>(
+        (parsed.questions || []).map((q: Question) => [q.id, q])
+      );
+      const freshQuestions = sampleQuestions.map(q => ({
+        ...q,
+        used: savedQuestionsById.get(q.id)?.used ?? false,
+      }));
+      const extraSavedQuestions = (parsed.questions || [])
+        .filter((q: Question) => !sampleQuestions.some(sq => sq.id === q.id))
+        .map((q: Question) => ({ ...q, used: q.used ?? false }));
       return {
         ...defaultState,
         ...parsed,
-        questions: shuffleArray([...savedQuestions, ...freshQuestions]),
+        questions: shuffleArray([...freshQuestions, ...extraSavedQuestions]),
         timerRunning: false,
       };
     }
