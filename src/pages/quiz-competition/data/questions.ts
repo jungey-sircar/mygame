@@ -13,6 +13,8 @@ export interface Question {
 }
 
 export const categories = [
+  'गाउँ खाने कथा',
+  'Riddles',
   'Geography',
   'World History',
   'Nepalese History',
@@ -28,8 +30,6 @@ export const categories = [
   'C Programming',
   'Python Programming',
   'Population & Health',
-  'गाउँ खाने कथा',
-  'Riddles',
 ] as const;
 
 export type Category = typeof categories[number];
