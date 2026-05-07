@@ -104,7 +104,7 @@ export function useQuizState() {
           text: q.text,
           answer: q.answer,
           category: q.category,
-          difficulty: q.difficulty as 'easy' | 'medium' | 'hard',
+          difficulty: q.difficulty as Question['difficulty'],
           used: false,
         }));
         setState(s => {
@@ -250,7 +250,7 @@ export function useQuizState() {
       if (data && !error) {
         setState(s => ({
           ...s,
-          questions: shuffleArray([...s.questions, { id: data.id, text: data.text, answer: data.answer, category: data.category, difficulty: data.difficulty as any, used: false }]),
+          questions: shuffleArray([...s.questions, { id: data.id, text: data.text, answer: data.answer, category: data.category, difficulty: data.difficulty as Question['difficulty'], used: false }]),
         }));
         return;
       }

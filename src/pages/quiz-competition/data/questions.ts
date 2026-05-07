@@ -1,11 +1,14 @@
 import { populationCompetitionQuestions } from './populationQuestions';
+import { gauKhaneKathaQuestions } from './gauKhaneKathaQuestions';
+import { riddleQuestions } from './riddles/riddleQuestions';
+import { extraQuestions } from './extraQuestions';
 
 export interface Question {
   id: string;
   text: string;
   answer: string;
   category: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: 'easy' | 'medium' | 'hard' | 'random';
   used?: boolean;
 }
 
@@ -25,6 +28,8 @@ export const categories = [
   'C Programming',
   'Python Programming',
   'Population & Health',
+  'गाउँ खाने कथा',
+  'Riddles',
 ] as const;
 
 export type Category = typeof categories[number];
@@ -634,24 +639,11 @@ export const sampleQuestions: Question[] = [
 
   // Population & Health (moved from programming quiz portal)
   ...populationCompetitionQuestions,
+
+  // गाउँ खाने कथा
+  ...gauKhaneKathaQuestions,
+
+  // Riddles
+  ...riddleQuestions,
+  ...extraQuestions,
 ];
-
-// Add 20 additional randomized questions per category based on existing bank.
-const EXTRA_QUESTIONS_PER_CATEGORY = 20;
-const extraQuestions: Question[] = [];
-
-for (const category of categories) {
-  const base = sampleQuestions.filter(q => q.category === category).slice(0, EXTRA_QUESTIONS_PER_CATEGORY);
-  const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
-  base.forEach((q, idx) => {
-    extraQuestions.push({
-      ...q,
-      id: `extra-${slug}-${idx + 1}`,
-      text: q.text,
-      used: false,
-    });
-  });
-}
-
-sampleQuestions.push(...extraQuestions);

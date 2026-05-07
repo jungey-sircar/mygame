@@ -1,4 +1,5 @@
 import type { Question } from './questions';
+import { populationExtraQuestions } from './extras/populationExtraQuestions';
 
 export const populationCompetitionQuestions: Question[] = [
   { id: 'pop-1', text: 'What does population density mean?', answer: 'Number of people per unit area', category: 'Population & Health', difficulty: 'easy' },
@@ -51,4 +52,5 @@ export const populationCompetitionQuestions: Question[] = [
   { id: 'pop-48', text: 'Population explosion can stress which public system the most?', answer: 'Public transport, housing, and healthcare', category: 'Population & Health', difficulty: 'hard' },
   { id: 'pop-49', text: 'Which habit lowers risk of lifestyle diseases?', answer: 'Regular physical activity', category: 'Population & Health', difficulty: 'hard' },
   { id: 'pop-50', text: 'What is the long-term goal of population education?', answer: 'Promote informed, responsible population-related decisions', category: 'Population & Health', difficulty: 'hard' },
+  ...populationExtraQuestions,
 ];

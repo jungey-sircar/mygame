@@ -245,11 +245,11 @@ const SettleThis = () => {
   const isComplete = usedIndices.length >= debates.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 relative overflow-hidden">
+    <div className="dark min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 relative overflow-hidden">
       {/* Subtle background decoration */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-purple-200/20 dark:bg-purple-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-teal-200/20 dark:bg-teal-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center min-h-screen px-4 py-8">
@@ -257,12 +257,12 @@ const SettleThis = () => {
         <div className="w-full max-w-4xl flex items-center justify-between mb-8">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors font-medium"
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors font-medium"
           >
             <ArrowLeft size={20} />
             <span className="hidden sm:inline">Back to Arena</span>
           </button>
-          <div className="text-sm font-semibold text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+          <div className="text-sm font-semibold text-slate-500 tracking-wider uppercase">
             {currentIndex + 1} / {debates.length}
           </div>
         </div>
@@ -277,10 +277,10 @@ const SettleThis = () => {
             transition={{ duration: 0.4 }}
             className="w-full max-w-4xl flex flex-col items-center flex-1"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-center text-slate-800 dark:text-slate-100 mb-2 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-center text-slate-100 mb-2 tracking-tight">
               {debate.question}
             </h1>
-            <p className="text-base sm:text-lg text-slate-400 dark:text-slate-500 mb-10 text-center">
+            <p className="text-base sm:text-lg text-slate-500 mb-10 text-center">
               Choose your side. The class decides.
             </p>
 
@@ -302,8 +302,8 @@ const SettleThis = () => {
                     className={`
                       relative p-6 sm:p-8 rounded-2xl border-2 text-left transition-all duration-300
                       ${isChosen
-                        ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10 shadow-lg shadow-purple-200/50 dark:shadow-purple-500/20"
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-xl"
+                        ? "border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20"
+                        : "border-slate-700 bg-slate-800/50 hover:border-purple-600 hover:shadow-xl"
                       }
                       ${isDimmed ? "pointer-events-none" : "cursor-pointer"}
                     `}
@@ -321,10 +321,10 @@ const SettleThis = () => {
                       </motion.svg>
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1 text-center">
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-100 mb-1 text-center">
                       {data.title}
                     </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+                    <p className="text-sm text-slate-400 text-center">
                       {data.description}
                     </p>
 
@@ -359,19 +359,19 @@ const SettleThis = () => {
                       return (
                         <div key={side} className="space-y-2">
                           <div className="flex items-baseline justify-between">
-                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                            <span className="text-sm font-semibold text-slate-300">
                               {debate[side].title}
                             </span>
                             <motion.span
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ delay: 0.5 }}
-                              className={`text-2xl font-black ${isWinner ? "text-purple-600 dark:text-purple-400" : "text-slate-400 dark:text-slate-500"}`}
+                              className={`text-2xl font-black ${isWinner ? "text-purple-400" : "text-slate-500"}`}
                             >
                               {pct}%
                             </motion.span>
                           </div>
-                          <div className="h-4 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div className="h-4 rounded-full bg-slate-700 overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
@@ -393,7 +393,7 @@ const SettleThis = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1 }}
-                    className="text-center text-slate-500 dark:text-slate-400 text-sm mb-8"
+                    className="text-center text-slate-400 text-sm mb-8"
                   >
                     Based on {totalVotes} votes •{" "}
                     {selected && votes[selected] > 50
@@ -410,14 +410,14 @@ const SettleThis = () => {
                   >
                     <button
                       onClick={() => navigate("/")}
-                      className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className="px-6 py-3 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-800 transition-colors"
                     >
                       Back to Arena
                     </button>
                     {!isComplete && (
                       <button
                         onClick={handleNext}
-                        className="px-6 py-3 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-lg shadow-purple-200/50 dark:shadow-purple-900/30"
+                        className="px-6 py-3 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-lg shadow-purple-900/30"
                       >
                         Next Question
                         <ArrowRight size={18} />

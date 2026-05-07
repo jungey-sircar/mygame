@@ -260,13 +260,11 @@ const AuctionChallenge = () => {
       } else {
         const offlineItems = shuffleItems(buildLocalAuctionItems()).slice(0, ITEMS_PER_SESSION);
         setItems(offlineItems);
-        setFetchError("Using local auction data (online auction service unavailable).");
       }
     } catch (e) {
       console.error("Failed to fetch auction items:", e);
       const offlineItems = shuffleItems(buildLocalAuctionItems()).slice(0, ITEMS_PER_SESSION);
       setItems(offlineItems);
-      setFetchError("Using local auction data (online auction service unavailable).");
     } finally {
       setLoading(false);
     }

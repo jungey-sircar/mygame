@@ -32,11 +32,11 @@ const games = [
     animation: <CodeFlowAnim />,
   },
   {
-    icon: "🧠",
-    title: "Neural Reinforcement",
-    description: "Simulates synaptic strengthening through repeated activation.",
-    to: "/neural-reinforcement",
-    animation: <NetworkAnim />,
+    icon: "🏆",
+    title: "Live Quiz Competition",
+    description: "Host-controlled multi-team quiz system for live events.",
+    to: "/quiz-competition",
+    animation: <PodiumAnim />,
   },
   {
     icon: "�",
@@ -150,14 +150,6 @@ const games = [
     to: "/tic-tac-toe",
     animation: <TicTacToeAnim />,
   },
- 
-  {
-    icon: "🏆",
-    title: "Live Quiz Competition",
-    description: "Host-controlled multi-team quiz system for live events.",
-    to: "/quiz-competition",
-    animation: <PodiumAnim />,
-  },
   {
     icon: "🔢",
     title: "Random Number Duel",
@@ -226,6 +218,13 @@ const games = [
     description: "Credential-protected register for first term, second term, and pre-board marks.",
     to: "/theory-marks",
     animation: <PodiumAnim />,
+  },
+  {
+    icon: "🧠",
+    title: "Neural Reinforcement",
+    description: "Simulates synaptic strengthening through repeated activation.",
+    to: "/neural-reinforcement",
+    animation: <NetworkAnim />,
   },
 ];
 
