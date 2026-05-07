@@ -1,13 +1,19 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { io, type Socket } from "socket.io-client";
 import ParticleBackground from "@/components/ParticleBackground";
 import Confetti from "@/components/Confetti";
 
 type CellValue = "X" | "O" | null;
 type Difficulty = "easy" | "medium" | "hard";
-type GameMode = null | "multiplayer" | "computer";
-type GamePhase = "mode-select" | "playing" | "ended";
+type GameMode = null | "multiplayer" | "computer" | "online";
+type GamePhase = "mode-select" | "room-join" | "waiting" | "playing" | "ended";
+
+const isBrowser = typeof window !== "undefined";
+const isLocalHost = isBrowser && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const SERVER_URL = import.meta.env.VITE_BINGO_SERVER_URL
+  || (isLocalHost ? "http://localhost:4001" : (isBrowser ? window.location.origin : "http://localhost:4001"));
 
 const WIN_COMBOS = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -176,6 +182,8 @@ const Cell = ({
 
 // ===== MAIN PAGE =====
 const TicTacToe = () => {
+  const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [mode, setMode] = useState<GameMode>(null);
   const [phase, setPhase] = useState<GamePhase>("mode-select");
   const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
@@ -188,8 +196,93 @@ const TicTacToe = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
   const aiTimerRef = useRef<number | null>(null);
+  const [playerName, setPlayerName] = useState("");
+  const [roomIdInput, setRoomIdInput] = useState("MAIN");
+  const [roomId, setRoomId] = useState("");
+  const [joined, setJoined] = useState(false);
+  const [playerSymbol, setPlayerSymbol] = useState<"X" | "O" | null>(null);
+  const [opponentName, setOpponentName] = useState("");
+  const [gameStarted, setGameStarted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const gameOver = winner !== null || draw;
+
+  // Initialize Socket.IO
+  useEffect(() => {
+    const socket = io(SERVER_URL, {
+      transports: ["websocket", "polling"],
+      timeout: 5000,
+      reconnectionAttempts: 5,
+    });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+      setErrorMsg("");
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    socket.on("connect_error", () => {
+      setIsConnected(false);
+      setErrorMsg(`Cannot connect to server at ${SERVER_URL}.`);
+    });
+
+    socket.on("game_state", (data: { board: CellValue[]; isXTurn: boolean; playerSymbol: "X" | "O"; opponentName: string; gameStarted: boolean }) => {
+      setBoard(data.board);
+      setIsXTurn(data.isXTurn);
+      setPlayerSymbol(data.playerSymbol);
+      setOpponentName(data.opponentName);
+      setGameStarted(data.gameStarted);
+      setPhase("playing");
+    });
+
+    socket.on("move_made", (data: { board: CellValue[]; isXTurn: boolean }) => {
+      setBoard(data.board);
+      setIsXTurn(data.isXTurn);
+      setMoveCount((c) => c + 1);
+      playSound("place");
+
+      const result = checkWinner(data.board);
+      if (result.winner) {
+        setWinner(result.winner);
+        setWinLine(result.line);
+        setPhase("ended");
+        playSound("win");
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000);
+        const ns = { ...score };
+        if (result.winner === playerSymbol) ns.xWins++;
+        else ns.oWins++;
+        setScore(ns);
+        saveScore(ns);
+      } else if (isDraw(data.board)) {
+        setDraw(true);
+        setPhase("ended");
+        playSound("draw");
+        const ns = { ...score, draws: score.draws + 1 };
+        setScore(ns);
+        saveScore(ns);
+      }
+    });
+
+    socket.on("room_full", () => {
+      setErrorMsg("This room is full. Try another room ID.");
+      setTimeout(() => setErrorMsg(""), 3000);
+    });
+
+    socket.on("game_result", (data: { winner: CellValue; line: number[] | null }) => {
+      setWinner(data.winner);
+      setWinLine(data.line);
+      setPhase("ended");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [score, playerSymbol]);
 
   const resetGame = useCallback(() => {
     setBoard(Array(9).fill(null));
@@ -207,45 +300,56 @@ const TicTacToe = () => {
     resetGame();
     setMode(null);
     setPhase("mode-select");
+    setJoined(false);
+    setPlayerSymbol(null);
+    setOpponentName("");
+    setGameStarted(false);
   }, [resetGame]);
 
   const handleMove = useCallback((index: number) => {
     if (board[index] || gameOver) return;
-    if (mode === "computer" && !isXTurn) return; // AI's turn
-
-    const next = [...board];
-    next[index] = isXTurn ? "X" : "O";
-    setBoard(next);
-    setMoveCount((c) => c + 1);
-    playSound("place");
-
-    const result = checkWinner(next);
-    if (result.winner) {
-      setWinner(result.winner);
-      setWinLine(result.line);
-      setPhase("ended");
-      playSound("win");
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4000);
-      const ns = { ...score };
-      if (result.winner === "X") ns.xWins++;
-      else ns.oWins++;
-      setScore(ns);
-      saveScore(ns);
+    
+    if (mode === "online") {
+      if (!isXTurn && playerSymbol === "X") return;
+      if (isXTurn && playerSymbol === "O") return;
+      
+      socketRef.current?.emit("make_move", { roomId, index });
+    } else if (mode === "computer" && !isXTurn) {
       return;
-    }
-    if (isDraw(next)) {
-      setDraw(true);
-      setPhase("ended");
-      playSound("draw");
-      const ns = { ...score, draws: score.draws + 1 };
-      setScore(ns);
-      saveScore(ns);
-      return;
-    }
+    } else {
+      const next = [...board];
+      next[index] = isXTurn ? "X" : "O";
+      setBoard(next);
+      setMoveCount((c) => c + 1);
+      playSound("place");
 
-    setIsXTurn(!isXTurn);
-  }, [board, gameOver, isXTurn, mode, score]);
+      const result = checkWinner(next);
+      if (result.winner) {
+        setWinner(result.winner);
+        setWinLine(result.line);
+        setPhase("ended");
+        playSound("win");
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000);
+        const ns = { ...score };
+        if (result.winner === "X") ns.xWins++;
+        else ns.oWins++;
+        setScore(ns);
+        saveScore(ns);
+        return;
+      }
+      if (isDraw(next)) {
+        setDraw(true);
+        setPhase("ended");
+        playSound("draw");
+        const ns = { ...score, draws: score.draws + 1 };
+        setScore(ns);
+        saveScore(ns);
+        return;
+      }
+      setIsXTurn(!isXTurn);
+    }
+  }, [board, gameOver, isXTurn, mode, score, roomId, playerSymbol]);
 
   // AI move
   useEffect(() => {
@@ -289,8 +393,26 @@ const TicTacToe = () => {
 
   const selectMode = useCallback((m: GameMode) => {
     setMode(m);
-    resetGame();
+    if (m === "online") {
+      setPhase("room-join");
+    } else {
+      resetGame();
+    }
   }, [resetGame]);
+
+  const handleJoinRoom = () => {
+    const normalizedRoom = roomIdInput.trim().toUpperCase() || "MAIN";
+    const normalizedName = playerName.trim() || "Player";
+    setErrorMsg("");
+
+    socketRef.current?.emit("join_tictactoe_game", {
+      roomId: normalizedRoom,
+      playerName: normalizedName,
+    });
+    
+    setRoomId(normalizedRoom);
+    setPhase("waiting");
+  };
 
   const winSet = useMemo(() => new Set(winLine || []), [winLine]);
 
@@ -339,7 +461,7 @@ const TicTacToe = () => {
                   >
                     <span className="text-2xl block mb-2">👥</span>
                     Multiplayer
-                    <span className="block text-xs font-body text-muted-foreground mt-1">2 Players</span>
+                    <span className="block text-xs font-body text-muted-foreground mt-1">2 Players (Local)</span>
                   </button>
                   <button
                     onClick={() => selectMode("computer")}
@@ -348,6 +470,19 @@ const TicTacToe = () => {
                     <span className="text-2xl block mb-2">🤖</span>
                     vs Computer
                     <span className="block text-xs font-body text-muted-foreground mt-1">AI Opponent</span>
+                  </button>
+                  <button
+                    onClick={() => selectMode("online")}
+                    className={`flex-1 px-6 py-4 rounded-xl font-display text-sm font-bold border transition-all ${
+                      isConnected
+                        ? "bg-neon-green/15 text-neon-green border-neon-green/30 hover:bg-neon-green/25 hover:shadow-[0_0_20px_hsl(150_80%_50%/0.2)]"
+                        : "bg-muted/10 text-muted-foreground border-border/30 cursor-not-allowed opacity-50"
+                    }`}
+                    disabled={!isConnected}
+                  >
+                    <span className="text-2xl block mb-2">🌐</span>
+                    Online
+                    <span className="block text-xs font-body text-muted-foreground mt-1">{isConnected ? "Remote Player" : "Connecting..."}</span>
                   </button>
                 </div>
 
@@ -375,6 +510,98 @@ const TicTacToe = () => {
               </motion.div>
             )}
 
+            {/* ===== ROOM JOIN ===== */}
+            {phase === "room-join" && (
+              <motion.div
+                key="room-join"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex flex-col items-center gap-4"
+              >
+                <h2 className="font-display text-xl font-bold text-foreground">Join Online Game</h2>
+
+                <div className="w-full space-y-3">
+                  <div>
+                    <label className="font-display text-sm font-bold text-muted-foreground block mb-1">Your Name</label>
+                    <input
+                      type="text"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full px-4 py-2 rounded-lg bg-muted/30 border border-border/60 text-foreground placeholder-muted-foreground focus:outline-none focus:border-neon-cyan/40"
+                      onKeyPress={(e) => e.key === "Enter" && handleJoinRoom()}
+                    />
+                  </div>
+                  <div>
+                    <label className="font-display text-sm font-bold text-muted-foreground block mb-1">Room ID</label>
+                    <input
+                      type="text"
+                      value={roomIdInput}
+                      onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
+                      placeholder="e.g., MAIN, GAME1"
+                      className="w-full px-4 py-2 rounded-lg bg-muted/30 border border-border/60 text-foreground placeholder-muted-foreground focus:outline-none focus:border-neon-cyan/40"
+                      onKeyPress={(e) => e.key === "Enter" && handleJoinRoom()}
+                    />
+                  </div>
+                </div>
+
+                {errorMsg && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-sm text-red-400 text-center"
+                  >
+                    {errorMsg}
+                  </motion.p>
+                )}
+
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={handleJoinRoom}
+                    className="flex-1 px-4 py-2 rounded-lg font-display text-sm font-bold bg-neon-green/20 text-neon-green border border-neon-green/30 hover:bg-neon-green/30 transition-all"
+                  >
+                    Join Room
+                  </button>
+                  <button
+                    onClick={backToModes}
+                    className="flex-1 px-4 py-2 rounded-lg font-display text-sm font-bold bg-muted text-muted-foreground border border-border hover:bg-muted/80 transition-all"
+                  >
+                    Back
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ===== WAITING FOR OPPONENT ===== */}
+            {phase === "waiting" && (
+              <motion.div
+                key="waiting"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex flex-col items-center gap-4"
+              >
+                <h2 className="font-display text-lg font-bold text-foreground">Waiting for Opponent...</h2>
+                <p className="font-body text-sm text-muted-foreground text-center">
+                  Room: <span className="font-display font-bold text-neon-cyan">{roomId}</span>
+                </p>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="text-3xl"
+                >
+                  ⏳
+                </motion.div>
+                <button
+                  onClick={backToModes}
+                  className="px-6 py-2 rounded-lg font-display text-sm font-bold bg-muted text-muted-foreground border border-border hover:bg-muted/80 transition-all"
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            )}
+
             {/* ===== GAME BOARD ===== */}
             {(phase === "playing" || phase === "ended") && (
               <motion.div
@@ -384,6 +611,18 @@ const TicTacToe = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center gap-5"
               >
+                {/* Online opponent info */}
+                {mode === "online" && (
+                  <div className="text-center text-sm font-body">
+                    <p className="text-muted-foreground">
+                      You: <span className={playerSymbol === "X" ? "text-neon-cyan font-bold" : "text-neon-pink font-bold"}>{playerSymbol}</span>
+                    </p>
+                    <p className="text-muted-foreground">
+                      Opponent (<span className={playerSymbol === "X" ? "text-neon-pink font-bold" : "text-neon-cyan font-bold"}>{playerSymbol === "X" ? "O" : "X"}</span>): {opponentName}
+                    </p>
+                  </div>
+                )}
+
                 {/* Difficulty selector for computer mode */}
                 {mode === "computer" && phase === "playing" && moveCount === 0 && (
                   <div className="flex gap-2 mb-2">
@@ -421,14 +660,20 @@ const TicTacToe = () => {
                             : "0 0 10px hsl(320 80% 58% / 0.5)"
                           }}
                         >
-                          Player {winner} Wins!
+                          {mode === "online"
+                            ? (winner === playerSymbol ? "You Win!" : "You Lose!")
+                            : `Player ${winner} Wins!`}
                         </span>
                       )}
                     </p>
                   ) : (
                     <p className="font-display text-sm font-bold">
                       <span className={isXTurn ? "text-neon-cyan" : "text-neon-pink"}>
-                        {mode === "computer" && !isXTurn ? "🤖 Computer thinking..." : `Player ${isXTurn ? "X" : "O"}'s Turn`}
+                        {mode === "computer" && !isXTurn 
+                          ? "🤖 Computer thinking..." 
+                          : mode === "online"
+                          ? (isXTurn === (playerSymbol === "X") ? "Your Turn" : `${opponentName}'s Turn`)
+                          : `Player ${isXTurn ? "X" : "O"}'s Turn`}
                       </span>
                     </p>
                   )}
@@ -443,7 +688,7 @@ const TicTacToe = () => {
                       index={i}
                       onClick={handleMove}
                       isWinCell={winSet.has(i)}
-                      disabled={gameOver || (mode === "computer" && !isXTurn)}
+                      disabled={gameOver || (mode === "computer" && !isXTurn) || (mode === "online" && (isXTurn !== (playerSymbol === "X")))}
                     />
                   ))}
                 </div>
