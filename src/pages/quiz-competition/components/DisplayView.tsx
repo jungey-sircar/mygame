@@ -13,10 +13,14 @@ const DisplayView = ({ state }: DisplayViewProps) => {
   const currentQuestion = state.filteredQuestions[state.currentQuestionIndex];
   const currentRound = state.rounds[state.currentRoundIndex];
   const currentTeam = state.teams[state.currentTeamIndex];
-  // Canonical ordering of questions per category (not shuffled)
-  const canonicalList = state.selectedCategory === 'All'
-    ? sampleQuestions
-    : sampleQuestions.filter((sq: any) => sq.category === state.selectedCategory);
+  // Build per-category ordinal map: id -> 1..N within its category
+  const idToOrdinal = new Map<string, number>();
+  for (const cat of categories) {
+    const catList = sampleQuestions.filter((sq: any) => sq.category === cat);
+    for (let idx = 0; idx < catList.length; idx++) {
+      idToOrdinal.set(catList[idx].id, idx + 1);
+    }
+  }
 
   return (
     <div className="h-screen flex bg-[hsl(220,25%,4%)] relative overflow-hidden">
@@ -186,8 +190,9 @@ const DisplayView = ({ state }: DisplayViewProps) => {
           <div className="flex-1 overflow-auto p-3">
             <div className="grid grid-cols-4 gap-2">
               {state.filteredQuestions.map((q: any, i: number) => {
-                const seqIndex = canonicalList.findIndex((cq: any) => cq.id === q.id);
-                const displayNumber = seqIndex >= 0 ? seqIndex + 1 : i + 1;
+                const displayNumber = state.selectedCategory === 'All'
+                  ? (idToOrdinal.get(q.id) ?? (i + 1))
+                  : (i + 1);
                 return (
                   <button
                     key={q.id}
