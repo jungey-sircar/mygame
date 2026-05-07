@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
 import Footer from "@/components/Footer";
 import SnakeEscapeAnimation from "@/components/SnakeEscapeAnimation";
+import { useEffect, useLayoutEffect } from "react";
 import {
   SpinWheelAnim, RPSAnim, SpotlightAnim, NetworkAnim, RocketAnim,
   TrolleyAnim, CodeTypingAnim, ScaleAnim, GavelAnim, TimelineAnim,
@@ -16,6 +17,8 @@ import {
   CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
+const HOME_SCROLL_KEY = "homepage-scroll-position";
+
 const games = [
   {
     icon: "🚋",
@@ -65,6 +68,13 @@ const games = [
     description: "Steady hands. Pure geometry.",
     to: "/circle",
     animation: <DrawCircleAnim />,
+  },
+  {
+    icon: "🎡",
+    title: "Spin The Wheel",
+    description: "Let fate decide your classroom challenge.",
+    to: "/spin",
+    animation: <SpinWheelAnim />,
   },
   {
     icon: "🧩",
@@ -171,13 +181,6 @@ const games = [
     to: "/subway-sprint",
   },
   {
-    icon: "🎡",
-    title: "Spin The Wheel",
-    description: "Let fate decide your classroom challenge.",
-    to: "/spin",
-    animation: <SpinWheelAnim />,
-  },
-  {
     icon: "✊",
     title: "Rock Paper Scissors",
     description: "Play against the computer with animated battle effects!",
@@ -230,6 +233,36 @@ const games = [
 
 const Index = () => {
   const { user, signOut } = useAuth();
+
+  useLayoutEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem(HOME_SCROLL_KEY);
+    if (savedScrollPosition) {
+      const position = Number(savedScrollPosition);
+      if (!Number.isNaN(position)) {
+        window.scrollTo(0, position);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const saveScrollPosition = () => {
+      sessionStorage.setItem(HOME_SCROLL_KEY, String(window.scrollY));
+    };
+
+    const handleBeforeUnload = () => {
+      saveScrollPosition();
+    };
+
+    window.addEventListener("scroll", saveScrollPosition, { passive: true });
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      saveScrollPosition();
+      window.removeEventListener("scroll", saveScrollPosition);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
