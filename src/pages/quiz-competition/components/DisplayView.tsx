@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Monitor, Trophy, ArrowLeft, ChevronLeft, ChevronRight, List } from 'lucide-react';
-import { categories, type Category } from '../data/questions';
+import { categories, type Category, sampleQuestions } from '../data/questions';
 
 interface DisplayViewProps {
   state: any;
@@ -13,6 +13,10 @@ const DisplayView = ({ state }: DisplayViewProps) => {
   const currentQuestion = state.filteredQuestions[state.currentQuestionIndex];
   const currentRound = state.rounds[state.currentRoundIndex];
   const currentTeam = state.teams[state.currentTeamIndex];
+  // Canonical ordering of questions per category (not shuffled)
+  const canonicalList = state.selectedCategory === 'All'
+    ? sampleQuestions
+    : sampleQuestions.filter((sq: any) => sq.category === state.selectedCategory);
 
   return (
     <div className="h-screen flex bg-[hsl(220,25%,4%)] relative overflow-hidden">
@@ -181,19 +185,23 @@ const DisplayView = ({ state }: DisplayViewProps) => {
           {/* Questions grid - numbered tiles */}
           <div className="flex-1 overflow-auto p-3">
             <div className="grid grid-cols-4 gap-2">
-              {state.filteredQuestions.map((q: any, i: number) => (
-                <button
-                  key={q.id}
-                  className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-sm font-bold transition-all
-                    ${q.used ? 'opacity-20 border-white/5 cursor-not-allowed' : 'border-white/10 hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:scale-105'}
-                    ${i === state.currentQuestionIndex && state.showQuestion ? 'border-neon-cyan/60 bg-neon-cyan/20 ring-1 ring-neon-cyan/30' : 'bg-white/5'}`}
-                  onClick={() => { if (!q.used) { state.selectQuestion(i); state.markQuestionUsed(q.id); } }}
-                  disabled={q.used}
-                >
-                  <span className="text-lg text-foreground">{i + 1}</span>
-                  <span className={`mt-0.5 w-2 h-2 rounded-full bg-green-400`} />
-                </button>
-              ))}
+              {state.filteredQuestions.map((q: any, i: number) => {
+                const seqIndex = canonicalList.findIndex((cq: any) => cq.id === q.id);
+                const displayNumber = seqIndex >= 0 ? seqIndex + 1 : i + 1;
+                return (
+                  <button
+                    key={q.id}
+                    className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-sm font-bold transition-all
+                      ${q.used ? 'opacity-20 border-white/5 cursor-not-allowed' : 'border-white/10 hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:scale-105'}
+                      ${i === state.currentQuestionIndex && state.showQuestion ? 'border-neon-cyan/60 bg-neon-cyan/20 ring-1 ring-neon-cyan/30' : 'bg-white/5'}`}
+                    onClick={() => { if (!q.used) { state.selectQuestion(i); state.markQuestionUsed(q.id); } }}
+                    disabled={q.used}
+                  >
+                    <span className="text-lg text-foreground">{displayNumber}</span>
+                    <span className={`mt-0.5 w-2 h-2 rounded-full bg-green-400`} />
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
