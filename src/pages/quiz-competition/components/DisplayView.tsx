@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Monitor, Trophy, ArrowLeft, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import { categories, type Category, sampleQuestions } from '../data/questions';
+import MillionaireQuestionDisplay from './MillionaireQuestionDisplay';
 
 interface DisplayViewProps {
   state: any;
@@ -51,16 +52,34 @@ const DisplayView = ({ state }: DisplayViewProps) => {
           </div>
 
           {/* Timer */}
-          <div className="flex items-center gap-3">
-            {(state.timerRunning || state.timerValue < state.timerDuration) && (
-              <span className={`font-mono text-3xl font-black ${state.timerValue <= 5 && state.timerValue > 0 ? 'text-red-400 animate-pulse' : state.timerValue === 0 ? 'text-red-500' : 'text-neon-cyan'}`}>
-                {state.timerValue}s
-              </span>
-            )}
-            <div className="flex gap-1">
-              <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.startTimer} disabled={state.timerRunning}>▶</Button>
-              <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.pauseTimer} disabled={!state.timerRunning}>⏸</Button>
-              <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.resetTimer}>↺</Button>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              {(state.timerRunning || state.timerValue < state.timerDuration) && (
+                <span className={`font-mono text-3xl font-black ${state.timerValue <= 5 && state.timerValue > 0 ? 'text-red-400 animate-pulse' : state.timerValue === 0 ? 'text-red-500' : 'text-neon-cyan'}`}>
+                  {state.timerValue}s
+                </span>
+              )}
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.startTimer} disabled={state.timerRunning}>▶</Button>
+                <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.pauseTimer} disabled={!state.timerRunning}>⏸</Button>
+                <Button size="sm" variant="outline" className="text-xs h-7" onClick={state.resetTimer}>↺</Button>
+              </div>
+            </div>
+            
+            {/* Timer Duration Presets */}
+            <div className="flex gap-1 flex-wrap">
+              {[10, 15, 20, 30, 45, 60].map(duration => (
+                <Button
+                  key={duration}
+                  size="sm"
+                  variant={state.timerDuration === duration ? "default" : "outline"}
+                  className={`text-xs h-6 px-2 ${state.timerDuration === duration ? 'bg-neon-cyan text-black border-neon-cyan' : ''}`}
+                  onClick={() => state.setTimerDuration(duration)}
+                  disabled={state.timerRunning}
+                >
+                  {duration}s
+                </Button>
+              ))}
             </div>
           </div>
         </div>
@@ -80,47 +99,60 @@ const DisplayView = ({ state }: DisplayViewProps) => {
         <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
           <AnimatePresence mode="wait">
             {state.showQuestion && currentQuestion ? (
-              <motion.div
-                key={currentQuestion.id}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                className="max-w-4xl w-full text-center space-y-8"
-              >
-                <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
-                  {currentQuestion.category}
-                </span>
+              // Check if this is a millionaire-style question
+              currentQuestion.options && currentQuestion.correctIndex !== undefined ? (
+                <MillionaireQuestionDisplay
+                  key={currentQuestion.id}
+                  question={currentQuestion}
+                  showAnswer={state.showAnswer}
+                  onToggleAnswer={state.toggleShowAnswer}
+                  onHideQuestion={state.toggleShowQuestion}
+                  state={state}
+                />
+              ) : (
+                // Traditional question display
+                <motion.div
+                  key={currentQuestion.id}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  className="max-w-4xl w-full text-center space-y-8"
+                >
+                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
+                    {currentQuestion.category}
+                  </span>
 
-                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight">
-                  {currentQuestion.text}
-                </h2>
+                  <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight">
+                    {currentQuestion.text}
+                  </h2>
 
-                <AnimatePresence>
-                  {state.showAnswer && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="mt-8"
-                    >
-                      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">Answer</p>
-                      <p className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neon-cyan">
-                        {currentQuestion.answer}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <AnimatePresence>
+                    {state.showAnswer && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mt-8"
+                      >
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">Answer</p>
+                        <p className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-neon-cyan">
+                          {currentQuestion.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                  <Button size="lg" variant="secondary" onClick={state.toggleShowAnswer} className="gap-2">
-                    {state.showAnswer ? <EyeOff size={16} /> : <Eye size={16} />}
-                    {state.showAnswer ? 'Hide Answer' : 'Reveal Answer'}
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={state.toggleShowQuestion} className="gap-2">
-                    <EyeOff size={16} /> Hide Question
-                  </Button>
-                </div>
-              </motion.div>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+                    <Button size="lg" variant="secondary" onClick={state.toggleShowAnswer} className="gap-2">
+                      {state.showAnswer ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {state.showAnswer ? 'Hide Answer' : 'Reveal Answer'}
+                    </Button>
+                    <Button size="lg" variant="outline" onClick={state.toggleShowQuestion} className="gap-2">
+                      <EyeOff size={16} /> Hide Question
+                    </Button>
+                  </div>
+                </motion.div>
+              )
             ) : (
               <motion.div
                 initial={{ opacity: 0 }}

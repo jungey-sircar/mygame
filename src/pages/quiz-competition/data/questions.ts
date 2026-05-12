@@ -2,6 +2,7 @@ import { populationCompetitionQuestions } from './populationQuestions';
 import { gauKhaneKathaQuestions } from './gauKhaneKathaQuestions';
 import { riddleQuestions } from './riddles/riddleQuestions';
 import { extraQuestions } from './extraQuestions';
+import { millionaireQuestions } from './millionaireQuestions';
 
 export interface Question {
   id: string;
@@ -10,6 +11,9 @@ export interface Question {
   category: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'random';
   used?: boolean;
+  // For millionaire-style multiple choice questions
+  options?: string[];
+  correctIndex?: number;
 }
 
 export const categories = [
@@ -30,6 +34,7 @@ export const categories = [
   'C Programming',
   'Python Programming',
   'Population & Health',
+  'Who Wants to Be a Millionaire',
 ] as const;
 
 export type Category = typeof categories[number];
@@ -646,4 +651,17 @@ export const sampleQuestions: Question[] = [
   // Riddles
   ...riddleQuestions,
   ...extraQuestions,
+
+  // ═══════════════════════════════════
+  // WHO WANTS TO BE A MILLIONAIRE (45 questions)
+  // ═══════════════════════════════════
+  ...millionaireQuestions.map((q) => ({
+    id: q.id,
+    text: q.text,
+    answer: q.options[q.correctIndex],
+    category: 'Who Wants to Be a Millionaire' as any,
+    difficulty: q.difficulty,
+    options: q.options,
+    correctIndex: q.correctIndex,
+  })),
 ];
