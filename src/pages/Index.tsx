@@ -325,6 +325,8 @@ const Index = () => {
             Designed for live classroom interaction
           </p>
           <Footer />
+
+          
         </div>
       </div>
     </div>

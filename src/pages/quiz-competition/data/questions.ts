@@ -2,6 +2,8 @@ import { populationCompetitionQuestions } from './populationQuestions';
 import { gauKhaneKathaQuestions } from './gauKhaneKathaQuestions';
 import { riddleQuestions } from './riddles/riddleQuestions';
 import { extraQuestions } from './extraQuestions';
+import { networkingQuestions } from './networkingQuestions';
+import { cybercrimeCyberlawQuestions } from './cybercrimeCyberlawQuestions';
 import { millionaireQuestions } from './millionaireQuestions';
 
 export interface Question {
@@ -30,6 +32,8 @@ export const categories = [
   'Artificial Intelligence',
   'Emerging Technology',
   'Science & Technology',
+  'Networking',
+  'Cybercrime and Cyberlaw',
   'Current Affairs',
   'C Programming',
   'Python Programming',
@@ -651,6 +655,12 @@ export const sampleQuestions: Question[] = [
   // Riddles
   ...riddleQuestions,
   ...extraQuestions,
+
+  // Networking
+  ...networkingQuestions,
+
+  // Cybercrime and Cyberlaw
+  ...cybercrimeCyberlawQuestions,
 
   // ═══════════════════════════════════
   // WHO WANTS TO BE A MILLIONAIRE (45 questions)

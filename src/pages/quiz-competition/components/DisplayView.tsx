@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Monitor, Trophy, ArrowLeft, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import { categories, type Category, sampleQuestions } from '../data/questions';
+import { getCategoryBadgeTone, getCategoryChipTone, getCategoryLabel } from '../lib/categoryStyles';
 import MillionaireQuestionDisplay from './MillionaireQuestionDisplay';
 
 interface DisplayViewProps {
@@ -118,8 +119,8 @@ const DisplayView = ({ state }: DisplayViewProps) => {
                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
                   className="max-w-4xl w-full text-center space-y-8"
                 >
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
-                    {currentQuestion.category}
+                  <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${getCategoryBadgeTone(currentQuestion.category)}`}>
+                    {getCategoryLabel(currentQuestion.category)}
                   </span>
 
                   <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight">
@@ -211,9 +212,9 @@ const DisplayView = ({ state }: DisplayViewProps) => {
                 key={cat}
                 onClick={() => state.setCategory(cat)}
                 className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors flex-shrink-0 whitespace-nowrap
-                  ${state.selectedCategory === cat ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30' : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'}`}
+                  ${getCategoryChipTone(cat, state.selectedCategory === cat)}`}
               >
-                {cat}
+                {getCategoryLabel(cat)}
               </button>
             ))}
           </div>

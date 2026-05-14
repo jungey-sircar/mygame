@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit3, ChevronRight, Users, Layers, HelpCircle, Clock, RotateCcw, Monitor, Trophy, Upload, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { categories, roundTypes, type Category, type RoundType } from '../data/questions';
+import { getCategoryBadgeTone, getCategoryChipTone, getCategoryLabel } from '../lib/categoryStyles';
 
 interface HostPanelProps {
   state: any;
@@ -230,9 +231,9 @@ export default function HostPanel({ state }: HostPanelProps) {
                   key={cat}
                   onClick={() => state.setCategory(cat as any)}
                   className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-200 hover:scale-110
-                    ${state.selectedCategory === cat ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30' : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'}`}
+                    ${getCategoryChipTone(cat, state.selectedCategory === cat)}`}
                 >
-                  {cat}
+                  {getCategoryLabel(cat)}
                 </button>
               ))}
             </div>
@@ -344,7 +345,9 @@ export default function HostPanel({ state }: HostPanelProps) {
                 const usedCount = catQuestions.filter((q: any) => q.used).length;
                 return (
                   <div key={cat} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
-                    <span className="text-foreground">{cat}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getCategoryBadgeTone(cat)}`}>
+                      {getCategoryLabel(cat)}
+                    </span>
                     <span className="text-muted-foreground font-mono">{usedCount}/{catQuestions.length} used</span>
                   </div>
                 );
@@ -363,7 +366,7 @@ export default function HostPanel({ state }: HostPanelProps) {
                         <Trash2 size={10} />
                       </Button>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-1">{q.category} · {q.answer}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{getCategoryLabel(q.category)} · {q.answer}</p>
                   </div>
                 ))}
               </div>

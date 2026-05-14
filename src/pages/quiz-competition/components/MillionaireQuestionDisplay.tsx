@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 import Confetti from '@/components/Confetti';
+import { getCategoryBadgeTone, getCategoryLabel } from '../lib/categoryStyles';
 
 interface MillionaireQuestionDisplayProps {
   question: any;
@@ -59,8 +60,8 @@ const MillionaireQuestionDisplay = ({
         exit={{ opacity: 0, scale: 0.9, y: -20 }}
         className="max-w-4xl w-full text-center space-y-8"
       >
-        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
-          {question.category}
+        <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${getCategoryBadgeTone(question.category)}`}>
+          {getCategoryLabel(question.category)}
         </span>
 
         <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight">
