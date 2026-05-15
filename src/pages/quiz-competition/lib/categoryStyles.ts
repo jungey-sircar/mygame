@@ -1,10 +1,31 @@
 export const CYBERCRIME_CATEGORY = 'Cybercrime and Cyberlaw';
 
+const CATEGORY_EMOJI_MAP: Record<string, string> = {
+  'गाउँ खाने कथा': '🏡',
+  Riddles: '🧩',
+  Geography: '🗺️',
+  'World History': '🏛️',
+  'Nepalese History': '🇳🇵',
+  'Nepal General Knowledge': '🇳🇵',
+  'Nepal Election 2082': '🗳️',
+  Programming: '💻',
+  Coding: '🧑‍💻',
+  Robotics: '🤖',
+  'Artificial Intelligence': '🧠',
+  'Emerging Technology': '🚀',
+  'Science & Technology': '🔬',
+  Networking: '🌐',
+  'Cybercrime and Cyberlaw': '🛡️',
+  'Current Affairs': '📰',
+  'C Programming': '📘',
+  'Python Programming': '🐍',
+  'Population & Health': '👥',
+  'Who Wants to Be a Millionaire': '💰',
+};
+
 export const getCategoryLabel = (category: string): string => {
-  if (category === CYBERCRIME_CATEGORY) {
-    return `🛡️ ${category}`;
-  }
-  return category;
+  const emoji = CATEGORY_EMOJI_MAP[category];
+  return emoji ? `${emoji} ${category}` : category;
 };
 
 export const getCategoryChipTone = (category: string, selected: boolean): string => {
