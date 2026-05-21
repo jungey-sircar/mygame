@@ -14,7 +14,7 @@ import {
   MoneyRainAnim, DrawCircleAnim, MemoryMatchAnim, LifeProgressAnim,
   UniverseAnim, PasswordAnim, ImposterAnim, WordBingoAnim,
   NumberBingoAnim, SpeakingAnim, FlameAnim, TicTacToeAnim,
-  CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim,
+  CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim, CloudAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const HOME_SCROLL_KEY = "homepage-scroll-position";
@@ -228,6 +228,32 @@ const games = [
     description: "Simulates synaptic strengthening through repeated activation.",
     to: "/neural-reinforcement",
     animation: <NetworkAnim />,
+  },
+  {
+    icon: "📈",
+    title: "PowerBI Master",
+    description: "Build reports, solve data puzzles, and climb the leaderboard.",
+    to: "/powerbi",
+  },
+  {
+    icon: "📊",
+    title: "Business Intelligence Lab",
+    description: "Learn BI basics with lessons, quizzes, dashboards, and badges.",
+    to: "/business-intelligence",
+  },
+  {
+    icon: "☁️",
+    title: "Cloud Computing",
+    description: "Learn AWS, DevOps, servers, scaling, databases, and deployment through games.",
+    subtitle: "Learn AWS, DevOps, servers, scaling, databases, and deployment through games.",
+    to: "/cloud-computing",
+    animation: <CloudAnim />,
+    progress: 68,
+    streak: 12,
+    difficulty: "Intermediate",
+    badge: "Cloud Module",
+    ctaLabel: "Continue Learning",
+    className: "sm:col-span-2 lg:col-span-2",
   },
 ];
 

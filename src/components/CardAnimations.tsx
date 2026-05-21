@@ -919,3 +919,62 @@ export const RandomNumberDuelAnim = () => {
 
   return <canvas ref={ref} className={CANVAS_CLASS} />;
 };
+
+// 26. Cloud Computing (floating cloud + server stack)
+export const CloudAnim = () => {
+  const ref = useLoop((ctx, w, h, t) => {
+    const cx = w / 2;
+    const cloudY = h * 0.38 + Math.sin(t * 1.6) * 4;
+    const drift = Math.sin(t * 0.9) * 10;
+
+    // soft sky glow
+    const glow = ctx.createRadialGradient(cx, cloudY, 10, cx, cloudY, Math.min(w, h) * 0.7);
+    glow.addColorStop(0, "rgba(77, 208, 255, 0.16)");
+    glow.addColorStop(1, "rgba(77, 208, 255, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    // cloud body
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.beginPath();
+    ctx.arc(cx - 18 + drift * 0.18, cloudY, 16, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.arc(cx, cloudY - 10, 20, Math.PI, 0);
+    ctx.arc(cx + 20 - drift * 0.14, cloudY, 14, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // server rack
+    const rackX = cx - 28;
+    const rackY = h * 0.58;
+    ctx.fillStyle = "rgba(9, 18, 38, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(rackX, rackY, 56, 24, 6);
+    ctx.fill();
+
+    for (let i = 0; i < 3; i++) {
+      const lightOn = Math.sin(t * 2.4 + i) > 0;
+      ctx.fillStyle = lightOn ? "rgba(46, 204, 113, 0.95)" : "rgba(255,255,255,0.22)";
+      ctx.beginPath();
+      ctx.arc(rackX + 12 + i * 15, rackY + 12, 2.5, 0, TAU);
+      ctx.fill();
+    }
+
+    // little clouds / packets
+    const packetXs = [w * 0.22, w * 0.76];
+    packetXs.forEach((x, i) => {
+      const y = h * (0.22 + i * 0.36) + Math.sin(t * (1.8 + i * 0.2)) * 5;
+      ctx.fillStyle = i === 0 ? "rgba(110, 231, 255, 0.8)" : "rgba(168, 85, 247, 0.8)";
+      ctx.beginPath();
+      ctx.arc(x, y, 4 + Math.sin(t * 3 + i) * 1.5, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(cx + drift * 0.2, cloudY);
+      ctx.stroke();
+    });
+  });
+
+  return <canvas ref={ref} className={CANVAS_CLASS} />;
+};

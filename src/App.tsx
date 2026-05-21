@@ -38,6 +38,9 @@ import LoopArcade from "./pages/LoopArcade";
 import RandomNumberDuel from "./pages/RandomNumberDuel";
 import SpaceLaunchGame from "./pages/SubwaySurferDash";
 import NeuralReinforcement from "./pages/neural-reinforcement/NeuralReinforcement";
+import BusinessIntelligence from "./pages/BusinessIntelligence";
+import PowerBI from "./pages/PowerBI";
+import CloudComputing from "./pages/CloudComputing";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -87,6 +90,9 @@ const App = () => (
             <Route path="/space-launch" element={<SpaceLaunchGame />} />
             <Route path="/subway-sprint" element={<SpaceLaunchGame />} />
             <Route path="/neural-reinforcement" element={<NeuralReinforcement />} />
+            <Route path="/powerbi" element={<PowerBI />} />
+            <Route path="/business-intelligence" element={<BusinessIntelligence />} />
+            <Route path="/cloud-computing" element={<CloudComputing />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
