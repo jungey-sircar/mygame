@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Play, SkipForward, Pause, RotateCcw, BookOpen, ChevronRight, Code2, Save, Trash2, FolderOpen } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Play, SkipForward, Pause, RotateCcw, BookOpen, ChevronRight, Code2, Save, Trash2, FolderOpen, Hand, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -1132,10 +1132,17 @@ interface SavedSnippet {
 const VisualCodeLab = () => {
   const { user } = useAuth();
   const [language, setLanguage] = useState<Language>("python");
-  const [code, setCode] = useState(getStarterCode("python"));
+  const [code, setCode] = useState(() => {
+    try {
+      return localStorage.getItem("vcl-code") ?? getStarterCode("python");
+    } catch {
+      return getStarterCode("python");
+    }
+  });
   const [steps, setSteps] = useState<ExecutionStep[]>([]);
   const [currentStep, setCurrentStep] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
+  const [runMode, setRunMode] = useState<"manual" | "auto">("manual");
   const [speed, setSpeed] = useState(1);
   const [learningMode, setLearningMode] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1182,12 +1189,23 @@ const VisualCodeLab = () => {
       setSteps(traced);
       setCurrentStep(0);
       setError(null);
-      setIsRunning(true);
+      setIsRunning(runMode === "auto");
     } catch (e: any) {
       setError(e.message || String(e));
       setIsRunning(false);
     }
-  }, [code, language]);
+  }, [code, language, runMode]);
+
+  const handleToggleRunMode = useCallback(() => {
+    setRunMode(prev => {
+      const next = prev === "auto" ? "manual" : "auto";
+      if (next === "manual") {
+        setIsRunning(false);
+        if (runTimer.current) clearTimeout(runTimer.current);
+      }
+      return next;
+    });
+  }, []);
 
   const handleStep = useCallback(() => {
     if (steps.length === 0) {
@@ -1224,10 +1242,6 @@ const VisualCodeLab = () => {
   }, [isRunning, currentStep, steps.length, speed]);
 
   useEffect(() => { localStorage.setItem("vcl-code", code); }, [code]);
-  useEffect(() => {
-    const saved = localStorage.getItem("vcl-code");
-    if (saved) setCode(saved);
-  }, []);
 
   const stepData = steps[currentStep] ?? null;
 
@@ -1263,6 +1277,10 @@ const VisualCodeLab = () => {
 
         <Button size="sm" variant="default" onClick={handleRun} disabled={isRunning} className="gap-1 text-xs h-7">
           <Play size={12} /> Run
+        </Button>
+        <Button size="sm" variant="secondary" onClick={handleToggleRunMode} className="gap-1 text-xs h-7">
+          {runMode === "auto" ? <Zap size={12} /> : <Hand size={12} />}
+          {runMode === "auto" ? "Auto" : "Manual"}
         </Button>
         <Button size="sm" variant="secondary" onClick={handleStep} className="gap-1 text-xs h-7">
           <SkipForward size={12} /> Step

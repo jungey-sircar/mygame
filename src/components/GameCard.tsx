@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 interface GameCardProps {
   icon: string;
@@ -16,6 +16,7 @@ interface GameCardProps {
   difficulty?: string;
   badge?: string;
   subtitle?: string;
+  actionButtons?: ReactNode;
 }
 
 const GameCard = ({
@@ -33,6 +34,7 @@ const GameCard = ({
   difficulty,
   badge,
   subtitle,
+  actionButtons,
 }: GameCardProps) => {
   const featured = progress !== undefined || streak !== undefined || ctaLabel || difficulty || badge || subtitle;
   const ringProgress = Math.max(0, Math.min(100, progress ?? 0));
@@ -41,6 +43,7 @@ const GameCard = ({
   const ringRadius = ringSize / 2 - ringStroke;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - ringProgress / 100);
+  const actionRow = actionButtons ? <div className="relative z-20 mt-4 flex flex-wrap gap-2 pointer-events-auto">{actionButtons}</div> : null;
 
   const content = (
     <div
@@ -62,7 +65,7 @@ const GameCard = ({
       {/* Glow effect */}
       <div className="absolute -inset-1 bg-gradient-to-r from-neon-purple/0 via-neon-cyan/0 to-neon-pink/0 group-hover:from-neon-purple/10 group-hover:via-neon-cyan/10 group-hover:to-neon-pink/10 rounded-xl transition-all duration-500 blur-xl pointer-events-none" />
 
-      <div className={`relative z-10 ${featured ? "flex h-full flex-col gap-5" : ""}`}>
+      <div className={`relative z-10 pointer-events-none ${featured ? "flex h-full flex-col gap-5" : ""}`}>
         {featured ? (
           <>
             <div className="flex items-start justify-between gap-4">
@@ -170,7 +173,7 @@ const GameCard = ({
               </span>
             )}
 
-            {!comingSoon && (
+            {!comingSoon && !actionButtons && (
               <div className="mt-4 flex items-center gap-2 text-neon-cyan font-display text-sm font-semibold tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <span>ENTER</span>
                 <span className="text-lg">→</span>
@@ -178,6 +181,7 @@ const GameCard = ({
             )}
           </>
         )}
+        {actionRow}
       </div>
     </div>
   );
@@ -185,9 +189,18 @@ const GameCard = ({
   if (comingSoon || !to) return <div className="animate-fade-in" style={{ animationDelay: `${delay}ms` }}>{content}</div>;
 
   return (
-    <Link to={to} className="block animate-fade-in" aria-label={`Open ${title}`} style={{ animationDelay: `${delay}ms` }}>
-      {content}
-    </Link>
+    <div className="animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
+      <div className="relative block">
+        <Link
+          to={to}
+          aria-label={`Open ${title}`}
+          className="absolute inset-0 z-0 rounded-xl"
+        />
+        <div className="relative z-10">
+          {content}
+        </div>
+      </div>
+    </div>
   );
 };
 
