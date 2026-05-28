@@ -6,6 +6,7 @@ interface GameCardProps {
   title: string;
   description: string;
   to?: string;
+  href?: string;
   comingSoon?: boolean;
   delay?: number;
   animation?: ReactNode;
@@ -24,6 +25,7 @@ const GameCard = ({
   title,
   description,
   to,
+  href,
   comingSoon,
   delay = 0,
   animation,
@@ -173,8 +175,8 @@ const GameCard = ({
               </span>
             )}
 
-            {!comingSoon && !actionButtons && (
-              <div className="mt-4 flex items-center gap-2 text-neon-cyan font-display text-sm font-semibold tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {!comingSoon && !actionButtons && !href && (
+              <div className="mt-4 flex items-center gap-2 text-neon-cyan font-display text-sm font-semibold tracking-wide">
                 <span>ENTER</span>
                 <span className="text-lg">→</span>
               </div>
@@ -186,17 +188,27 @@ const GameCard = ({
     </div>
   );
 
-  if (comingSoon || !to) return <div className="animate-fade-in" style={{ animationDelay: `${delay}ms` }}>{content}</div>;
+  if (comingSoon || (!to && !href)) return <div className="animate-fade-in" style={{ animationDelay: `${delay}ms` }}>{content}</div>;
 
   return (
     <div className="animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
       <div className="relative block">
-        <Link
-          to={to}
-          aria-label={`Open ${title}`}
-          className="absolute inset-0 z-0 rounded-xl"
-        />
-        <div className="relative z-10">
+        {href ? (
+          <a
+            href={href}
+            aria-label={`Open ${title}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute inset-0 z-0 rounded-xl"
+          />
+        ) : (
+          <Link
+            to={to!}
+            aria-label={`Open ${title}`}
+            className="absolute inset-0 z-0 rounded-xl"
+          />
+        )}
+        <div className="relative z-10 pointer-events-none">
           {content}
         </div>
       </div>

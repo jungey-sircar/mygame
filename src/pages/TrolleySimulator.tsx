@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 // ─── Level Data ───────────────────────────────────────────────
 interface Level {
@@ -738,9 +739,21 @@ const TrolleySimulator = () => {
           className="max-w-2xl w-full bg-slate-900/70 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-2xl"
         >
           {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-50 tracking-tight">Trolley Problems</h1>
-            <p className="text-lg text-slate-300 mt-1">Level {currentLevel + 1}: {level.name}</p>
+          <div className="w-full max-w-2xl mx-auto mb-6">
+            <div className="w-full flex items-center justify-start mb-4">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors font-medium"
+                aria-label="Back to Arena"
+              >
+                <ArrowLeft size={18} />
+                <span className="hidden sm:inline">Back to Arena</span>
+              </button>
+            </div>
+            <div className="text-center">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-50 tracking-tight">Trolley Problems</h1>
+              <p className="text-lg text-slate-300 mt-1">Level {currentLevel + 1}: {level.name}</p>
+            </div>
             <div className="flex justify-center gap-1 mt-3">
               {levels.map((_, i) => (
                 <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i < currentLevel ? "bg-slate-100" : i === currentLevel ? "bg-rose-400" : "bg-slate-700"}`} />

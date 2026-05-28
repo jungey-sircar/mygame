@@ -1,11 +1,10 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 
 const TAU = Math.PI * 2;
 const CANVAS_CLASS = "w-full h-28 sm:h-32 rounded-lg pointer-events-none";
 
 function useLoop(draw: (ctx: CanvasRenderingContext2D, w: number, h: number, t: number) => void) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const cb = useCallback(draw, []);
   useEffect(() => {
     let raf: number;
     const loop = () => {
@@ -19,13 +18,13 @@ function useLoop(draw: (ctx: CanvasRenderingContext2D, w: number, h: number, t: 
         const ctx = canvas.getContext("2d")!;
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, h);
-        cb(ctx, w, h, performance.now() / 1000);
+        draw(ctx, w, h, performance.now() / 1000);
       }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [cb]);
+  }, [draw]);
   return ref;
 }
 
@@ -352,7 +351,7 @@ export const MoneyRainAnim = () => {
     Array.from({ length: 15 }, () => ({
       x: Math.random(),
       y: Math.random(),
-      s: 0.5 + Math.random() * 1,
+      s: 0.5 + Math.random(),
       r: Math.random() * TAU,
     }))
   );
@@ -392,7 +391,11 @@ export const DrawCircleAnim = () => {
         const wobble = Math.sin(a * 5) * 2;
         const px = cx + Math.cos(a - Math.PI / 2) * (r + wobble);
         const py = cy + Math.sin(a - Math.PI / 2) * (r + wobble);
-        a === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        if (a === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
       }
       ctx.stroke();
     }
@@ -978,3 +981,76 @@ export const CloudAnim = () => {
 
   return <canvas ref={ref} className={CANVAS_CLASS} />;
 };
+
+// 27. PyPlay (python play loop)
+export const PyPlayAnim = () => {
+  const ref = useLoop((ctx, w, h, t) => {
+    const cx = w / 2;
+    const cy = h / 2;
+
+    // Background glow
+    const glow = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.min(w, h) * 0.75);
+    glow.addColorStop(0, "rgba(255, 212, 59, 0.16)");
+    glow.addColorStop(1, "rgba(255, 212, 59, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    // Python-like dual orbs
+    const bob = Math.sin(t * 2) * 4;
+    const leftX = cx - 16;
+    const rightX = cx + 16;
+    const topY = cy - 8 + bob;
+    const bottomY = cy + 10 - bob;
+
+    ctx.fillStyle = "rgba(53, 114, 165, 0.9)";
+    ctx.beginPath();
+    ctx.roundRect(leftX - 18, topY - 16, 34, 34, 10);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255, 213, 60, 0.92)";
+    ctx.beginPath();
+    ctx.roundRect(rightX - 16, bottomY - 16, 34, 34, 10);
+    ctx.fill();
+
+    // Eye dots
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.beginPath();
+    ctx.arc(leftX - 6, topY - 2, 2.2, 0, TAU);
+    ctx.arc(rightX + 6, bottomY + 1, 2.2, 0, TAU);
+    ctx.fill();
+
+    // Play button pulse
+    const pulse = 1 + Math.sin(t * 3) * 0.08;
+    ctx.save();
+    ctx.translate(cx, cy + 4);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(-6, -10);
+    ctx.lineTo(12, 0);
+    ctx.lineTo(-6, 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Floating code bars
+    const bars = [0.18, 0.42, 0.66, 0.82];
+    bars.forEach((p, i) => {
+      const bw = 28 + i * 7;
+      const x = w * 0.2 + Math.sin(t * 1.4 + i) * 5;
+      const y = h * p + Math.cos(t * 1.8 + i) * 2;
+      ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.22)";
+      ctx.beginPath();
+      ctx.roundRect(x, y, bw, 3, 2);
+      ctx.fill();
+    });
+
+    // Small terminal caret
+    if (Math.sin(t * 5) > -0.2) {
+      ctx.fillStyle = "rgba(255,255,255,0.75)";
+      ctx.fillRect(w * 0.72, h * 0.72, 5, 2);
+    }
+  });
+
+  return <canvas ref={ref} className={CANVAS_CLASS} />;
+};
+

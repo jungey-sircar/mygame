@@ -14,12 +14,19 @@ import {
   MoneyRainAnim, DrawCircleAnim, MemoryMatchAnim, LifeProgressAnim,
   UniverseAnim, PasswordAnim, ImposterAnim, WordBingoAnim,
   NumberBingoAnim, SpeakingAnim, FlameAnim, TicTacToeAnim,
-  CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim, CloudAnim,
+  CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim, CloudAnim, PyPlayAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const HOME_SCROLL_KEY = "homepage-scroll-position";
 
 const games = [
+  {
+    icon: "🐍",
+    title: "PyPlay",
+    description: "Jump into an animated Python playground and experiment with code ideas.",
+    href: "https://ancient-sea-55742-c6a9c2e8d2e1.herokuapp.com/",
+    animation: <PyPlayAnim />,
+  },
   {
     icon: "🚋",
     title: "Trolley Simulator",
@@ -314,22 +321,20 @@ const Index = () => {
               </Button>
             </Link>
           )}
-          <ThemeToggle />
         </div>
 
-        {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20 animate-fade-in">
-            <h1 className="flex items-center gap-4 font-display text-4xl sm:text-5xl md:text-7xl font-black tracking-tight text-foreground mb-4 text-glow-purple animate-float">
-                <img
-                    src={conan}
-                    alt="Conan"
-                    className="w-20 sm:w-24 md:w-32 h-auto object-contain"
-                />
-                <span>nerds.games</span>
-            </h1>
-            <p className="font-body text-lg sm:text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
-                Games of luck. Battles of skill.
-            </p>
+          <h1 className="flex items-center gap-4 font-display text-4xl sm:text-5xl md:text-7xl font-black tracking-tight text-foreground mb-4 text-glow-purple animate-float">
+            <img
+              src={conan}
+              alt="Conan"
+              className="w-20 sm:w-24 md:w-32 h-auto object-contain"
+            />
+            <span>nerds.games</span>
+          </h1>
+          <p className="font-body text-lg sm:text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
+            Games of luck. Battles of skill.
+          </p>
           {/* Decorative line */}
           <div className="mt-8 mx-auto w-48 h-[2px] bg-gradient-to-r from-transparent via-neon-purple to-transparent opacity-60" />
         </div>
