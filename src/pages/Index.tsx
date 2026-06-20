@@ -15,11 +15,19 @@ import {
   UniverseAnim, PasswordAnim, ImposterAnim, WordBingoAnim,
   NumberBingoAnim, SpeakingAnim, FlameAnim, TicTacToeAnim,
   CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim, CloudAnim, PyPlayAnim,
+  TugOfWarAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const HOME_SCROLL_KEY = "homepage-scroll-position";
 
 const games = [
+  {
+    icon: "🪢",
+    title: "Maths Tug Of War",
+    description: "Solve math problems and pull the rope to victory.",
+    to: "/maths-tug-of-war",
+    animation: <TugOfWarAnim />,
+  },
   {
     icon: "🐍",
     title: "PyPlay",

@@ -41,6 +41,7 @@ import NeuralReinforcement from "./pages/neural-reinforcement/NeuralReinforcemen
 import BusinessIntelligence from "./pages/BusinessIntelligence";
 import PowerBI from "./pages/PowerBI";
 import CloudComputing from "./pages/CloudComputing";
+import MathsTugOfWar from "./pages/MathsTugOfWar";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/powerbi" element={<PowerBI />} />
             <Route path="/business-intelligence" element={<BusinessIntelligence />} />
             <Route path="/cloud-computing" element={<CloudComputing />} />
+            <Route path="/maths-tug-of-war" element={<MathsTugOfWar />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

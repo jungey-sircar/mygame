@@ -1054,3 +1054,124 @@ export const PyPlayAnim = () => {
   return <canvas ref={ref} className={CANVAS_CLASS} />;
 };
 
+// 28. Maths Tug Of War
+export const TugOfWarAnim = () => {
+  const symbolsRef = useRef(
+    Array.from({ length: 6 }, (_, i) => ({
+      x: 0.1 + Math.random() * 0.8,
+      y: Math.random(),
+      s: 0.3 + Math.random() * 0.5,
+      char: ["+", "−", "×", "÷", "=", "π"][i],
+    }))
+  );
+  const ref = useLoop((ctx, w, h, t) => {
+    const cy = h * 0.52;
+    const ropeY = cy;
+    const pull = Math.sin(t * 1.3) * w * 0.12;
+    const flagX = w / 2 + pull;
+
+    // Rope
+    ctx.strokeStyle = "rgba(210,180,120,0.85)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, ropeY);
+    ctx.lineTo(w * 0.92, ropeY);
+    ctx.stroke();
+
+    // Rope segments / knots
+    for (let k = 0; k < 7; k++) {
+      const kx = w * 0.15 + k * (w * 0.7) / 6 + pull * 0.3;
+      ctx.fillStyle = "rgba(180,140,80,0.7)";
+      ctx.beginPath();
+      ctx.arc(kx, ropeY, 3, 0, TAU);
+      ctx.fill();
+    }
+
+    // Center flag
+    ctx.fillStyle = "rgba(255,220,50,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(flagX, ropeY - 18);
+    ctx.lineTo(flagX + 10, ropeY - 12);
+    ctx.lineTo(flagX, ropeY - 6);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(flagX, ropeY - 20);
+    ctx.lineTo(flagX, ropeY);
+    ctx.stroke();
+
+    // Left character (blue team)
+    const lx = w * 0.1 + pull * 0.15;
+    const lean = Math.sin(t * 3) * 2;
+    ctx.fillStyle = "rgba(52,152,219,0.85)";
+    ctx.beginPath();
+    ctx.arc(lx, cy - 22, 7, 0, TAU);
+    ctx.fill();
+    ctx.fillRect(lx - 4, cy - 15, 8, 14);
+    // Arms reaching right
+    ctx.strokeStyle = "rgba(52,152,219,0.7)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(lx + 4, cy - 10);
+    ctx.lineTo(lx + 18 + lean, ropeY);
+    ctx.stroke();
+    // Legs
+    ctx.beginPath();
+    ctx.moveTo(lx - 2, cy - 1);
+    ctx.lineTo(lx - 6 - lean, cy + 12);
+    ctx.moveTo(lx + 2, cy - 1);
+    ctx.lineTo(lx + 2, cy + 12);
+    ctx.stroke();
+
+    // Right character (red team)
+    const rx = w * 0.9 + pull * 0.15;
+    ctx.fillStyle = "rgba(231,76,60,0.85)";
+    ctx.beginPath();
+    ctx.arc(rx, cy - 22, 7, 0, TAU);
+    ctx.fill();
+    ctx.fillRect(rx - 4, cy - 15, 8, 14);
+    ctx.strokeStyle = "rgba(231,76,60,0.7)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(rx - 4, cy - 10);
+    ctx.lineTo(rx - 18 - lean, ropeY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(rx - 2, cy - 1);
+    ctx.lineTo(rx - 2, cy + 12);
+    ctx.moveTo(rx + 2, cy - 1);
+    ctx.lineTo(rx + 6 + lean, cy + 12);
+    ctx.stroke();
+
+    // Dust particles
+    for (let d = 0; d < 4; d++) {
+      const dx = (d < 2 ? lx : rx) + Math.sin(t * 5 + d * 3) * 6;
+      const dy = cy + 14 + Math.abs(Math.sin(t * 4 + d)) * 4;
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + Math.sin(t * 6 + d) * 0.08})`;
+      ctx.beginPath();
+      ctx.arc(dx, dy, 1.5, 0, TAU);
+      ctx.fill();
+    }
+
+    // Floating math symbols
+    symbolsRef.current.forEach((s) => {
+      const sy = ((s.y - t * s.s * 0.06) % 1 + 1) % 1;
+      const sx = s.x * w + Math.sin(t * 1.2 + s.x * 5) * 6;
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillStyle = `rgba(0,220,220,${0.25 + Math.sin(t * 2 + s.x * 8) * 0.12})`;
+      ctx.textAlign = "center";
+      ctx.fillText(s.char, sx, sy * h);
+    });
+
+    // Team labels
+    ctx.font = "bold 9px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(52,152,219,0.6)";
+    ctx.fillText("BLUE", lx, cy + 28);
+    ctx.fillStyle = "rgba(231,76,60,0.6)";
+    ctx.fillText("RED", rx, cy + 28);
+  });
+  return <canvas ref={ref} className={CANVAS_CLASS} />;
+};
+
