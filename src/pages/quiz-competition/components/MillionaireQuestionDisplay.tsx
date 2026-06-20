@@ -71,9 +71,9 @@ const MillionaireQuestionDisplay = ({
         {/* Options Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12">
           {options.map((option: string, index: number) => {
-            let bgColor = 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-neon-cyan/40';
+            let bgColor = 'bg-muted/20 hover:bg-muted/30 border-border hover:border-neon-cyan/40';
             let textColor = 'text-foreground';
-            let borderColor = 'border-white/10';
+            let borderColor = 'border-border';
 
             if (showResult && selectedIndex === index) {
               if (isCorrect) {

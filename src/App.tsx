@@ -42,6 +42,7 @@ import BusinessIntelligence from "./pages/BusinessIntelligence";
 import PowerBI from "./pages/PowerBI";
 import CloudComputing from "./pages/CloudComputing";
 import MathsTugOfWar from "./pages/MathsTugOfWar";
+import FlexboxQuest from "./pages/flexbox-quest/FlexboxQuest";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -95,6 +96,7 @@ const App = () => (
             <Route path="/business-intelligence" element={<BusinessIntelligence />} />
             <Route path="/cloud-computing" element={<CloudComputing />} />
             <Route path="/maths-tug-of-war" element={<MathsTugOfWar />} />
+            <Route path="/flexbox-quest" element={<FlexboxQuest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

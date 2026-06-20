@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Monitor, Trophy } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface ScoreboardViewProps {
   state: any;
@@ -12,7 +13,7 @@ export default function ScoreboardView({ state }: ScoreboardViewProps) {
   const maxScore = Math.max(...state.teams.map((t: any) => t.score), 1);
 
   return (
-    <div className="h-full flex flex-col bg-[hsl(220,25%,4%)] relative overflow-hidden">
+    <div className="h-full flex flex-col bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-30%] left-[20%] w-[800px] h-[800px] bg-neon-purple/8 rounded-full blur-[200px]" />
@@ -20,7 +21,7 @@ export default function ScoreboardView({ state }: ScoreboardViewProps) {
       </div>
 
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/10">
+      <div className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-3">
           <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => state.setView('host')}>
             <ArrowLeft size={14} /> Host
@@ -32,7 +33,7 @@ export default function ScoreboardView({ state }: ScoreboardViewProps) {
         <div className="text-center">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{currentRound?.name}</p>
         </div>
-        <div />
+        <ThemeToggle />
       </div>
 
       {/* Title */}
@@ -58,7 +59,7 @@ export default function ScoreboardView({ state }: ScoreboardViewProps) {
               ${i === 0 ? 'border-amber-400/30 bg-amber-400/5' :
                 i === 1 ? 'border-gray-300/20 bg-gray-300/5' :
                 i === 2 ? 'border-amber-700/20 bg-amber-700/5' :
-                'border-white/10 bg-white/5'}`}
+                'border-border bg-muted/20'}`}
             >
               {/* Rank */}
               <span className={`text-3xl font-display font-black min-w-[3rem] text-center
@@ -73,7 +74,7 @@ export default function ScoreboardView({ state }: ScoreboardViewProps) {
 
               {/* Score bar */}
               <div className="hidden sm:block flex-1 max-w-[200px]">
-                <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                <div className="h-3 rounded-full bg-muted/20 overflow-hidden">
                   <motion.div
                     className="h-full rounded-full bg-gradient-to-r from-neon-purple to-neon-cyan"
                     initial={{ width: 0 }}

@@ -5,6 +5,7 @@ import { Eye, EyeOff, Monitor, Trophy, ArrowLeft, ChevronLeft, ChevronRight, Lis
 import { categories, type Category, sampleQuestions } from '../data/questions';
 import { getCategoryBadgeTone, getCategoryChipTone, getCategoryLabel } from '../lib/categoryStyles';
 import MillionaireQuestionDisplay from './MillionaireQuestionDisplay';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface DisplayViewProps {
   state: any;
@@ -25,7 +26,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
   }
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-[hsl(220,25%,4%)] relative overflow-hidden">
+    <div className="h-screen flex flex-col md:flex-row bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-neon-purple/10 rounded-full blur-[150px]" />
@@ -35,7 +36,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
       {/* Main display area */}
       <div className="flex-1 flex flex-col relative z-10">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border">
           <div className="flex items-center gap-3">
             <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => state.setView('host')}>
               <ArrowLeft size={14} /> Host
@@ -46,6 +47,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
             <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setShowPanel(!showPanel)}>
               <List size={14} /> {showPanel ? 'Hide' : 'Show'} Questions
             </Button>
+            <ThemeToggle />
           </div>
 
           <div className="text-center">
@@ -86,7 +88,7 @@ const DisplayView = ({ state }: DisplayViewProps) => {
         </div>
 
         {/* Current team indicator */}
-        <div className="text-center py-2 border-b border-white/5 flex items-center justify-center gap-4">
+        <div className="text-center py-2 border-b border-border flex items-center justify-center gap-4">
           <Button size="sm" variant="ghost" className="text-xs h-6" onClick={state.nextTeam}>
             <ChevronRight size={12} /> Next Team
           </Button>
@@ -170,13 +172,13 @@ const DisplayView = ({ state }: DisplayViewProps) => {
         </div>
 
         {/* Mini scoreboard */}
-        <div className="border-t border-white/10 px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <div className="flex gap-3 justify-center flex-wrap">
             {state.teams.map((team: any, i: number) => (
               <div
                 key={team.id}
                 className={`px-4 py-2 rounded-lg border transition-all
-                  ${i === state.currentTeamIndex ? 'border-neon-cyan/50 bg-neon-cyan/10' : 'border-white/10 bg-white/5'}`}
+                  ${i === state.currentTeamIndex ? 'border-neon-cyan/50 bg-neon-cyan/10' : 'border-border bg-muted/20'}`}
               >
                 <p className="text-xs text-muted-foreground">{team.name}</p>
                 <p className="text-lg font-mono font-bold text-foreground text-center">{team.score}</p>
@@ -193,13 +195,13 @@ const DisplayView = ({ state }: DisplayViewProps) => {
 
       {/* Side panel: Question selector */}
       {showPanel && (
-        <div className="w-full md:w-80 md:border-l border-t md:border-t-0 border-white/10 bg-background/90 backdrop-blur-xl flex flex-col relative z-10 overflow-hidden">
-          <div className="px-3 py-2 border-b border-white/10">
+        <div className="w-full md:w-80 md:border-l border-t md:border-t-0 border-border bg-background/90 backdrop-blur-xl flex flex-col relative z-10 overflow-hidden">
+          <div className="px-3 py-2 border-b border-border">
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Questions</p>
           </div>
 
           {/* Category filter */}
-          <div className="px-3 py-2 border-b border-white/10 flex gap-1 max-h-24 overflow-x-auto md:overflow-auto flex-nowrap md:flex-wrap">
+          <div className="px-3 py-2 border-b border-border flex gap-1 max-h-24 overflow-x-auto md:overflow-auto flex-nowrap md:flex-wrap">
             <button
               onClick={() => state.setCategory('All')}
               className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors
@@ -230,8 +232,8 @@ const DisplayView = ({ state }: DisplayViewProps) => {
                   <button
                     key={q.id}
                     className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-sm font-bold transition-all
-                      ${q.used ? 'opacity-20 border-white/5 cursor-not-allowed' : 'border-white/10 hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:scale-105'}
-                      ${i === state.currentQuestionIndex && state.showQuestion ? 'border-neon-cyan/60 bg-neon-cyan/20 ring-1 ring-neon-cyan/30' : 'bg-white/5'}`}
+                      ${q.used ? 'opacity-20 border-border cursor-not-allowed' : 'border-border hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:scale-105'}
+                      ${i === state.currentQuestionIndex && state.showQuestion ? 'border-neon-cyan/60 bg-neon-cyan/20 ring-1 ring-neon-cyan/30' : 'bg-muted/20'}`}
                     onClick={() => { if (!q.used) { state.selectQuestion(i); state.markQuestionUsed(q.id); } }}
                     disabled={q.used}
                   >

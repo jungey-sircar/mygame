@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "@/components/Confetti";
 import ParticleBackground from "@/components/ParticleBackground";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // ─── Types ──────────────────────────────────────────────────────────
 type GameMode = "pvp" | "pvai" | "classroom" | null;
@@ -334,7 +335,7 @@ interface NumPadProps {
 
 const NumPad = ({ value, onChange, onSubmit, disabled, color }: NumPadProps) => {
   const accent = color === "blue" ? "bg-blue-600 hover:bg-blue-500" : "bg-red-600 hover:bg-red-500";
-  const clearColor = color === "blue" ? "bg-blue-500/20 text-blue-300 hover:bg-blue-500/30" : "bg-red-500/20 text-red-300 hover:bg-red-500/30";
+  const clearColor = color === "blue" ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 hover:bg-blue-500/30" : "bg-red-500/20 text-red-600 dark:text-red-300 hover:bg-red-500/30";
   const btnBase = "rounded-lg font-display font-bold text-foreground transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed select-none";
 
   const press = (digit: string) => {
@@ -346,7 +347,7 @@ const NumPad = ({ value, onChange, onSubmit, disabled, color }: NumPadProps) => 
     <div className="space-y-2">
       {/* Display */}
       <div className={`w-full h-11 rounded-lg border ${
-        color === "blue" ? "border-blue-500/30 bg-blue-950/40" : "border-red-500/30 bg-red-950/40"
+        color === "blue" ? "border-blue-500/30 bg-blue-500/10" : "border-red-500/30 bg-red-500/10"
       } flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums min-h-[44px]`}>
         {value || <span className="text-muted-foreground/40 text-base">?</span>}
       </div>
@@ -358,7 +359,7 @@ const NumPad = ({ value, onChange, onSubmit, disabled, color }: NumPadProps) => 
             key={n}
             onClick={() => press(String(n))}
             disabled={disabled}
-            className={`${btnBase} h-10 sm:h-11 bg-white/8 hover:bg-white/15 text-base sm:text-lg`}
+            className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 text-base sm:text-lg`}
           >
             {n}
           </button>
@@ -373,7 +374,7 @@ const NumPad = ({ value, onChange, onSubmit, disabled, color }: NumPadProps) => 
         <button
           onClick={() => press("0")}
           disabled={disabled}
-          className={`${btnBase} h-10 sm:h-11 bg-white/8 hover:bg-white/15 text-base sm:text-lg`}
+          className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 text-base sm:text-lg`}
         >
           0
         </button>
@@ -681,7 +682,10 @@ const MathsTugOfWar = () => {
         ))}
         <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 py-12 sm:py-16">
           <Link to="/" className="absolute top-4 left-4 sm:top-6 sm:left-6 font-display text-sm text-muted-foreground hover:text-foreground transition-colors">← Back</Link>
-          <button onClick={() => setMuted(m => !m)} className="absolute top-4 right-4 sm:top-6 sm:right-6 text-xl opacity-60 hover:opacity-100 transition-opacity" title={muted ? "Unmute" : "Mute"}>{muted ? "🔇" : "🔊"}</button>
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+            <ThemeToggle />
+            <button onClick={() => setMuted(m => !m)} className="text-xl opacity-60 hover:opacity-100 transition-opacity" title={muted ? "Unmute" : "Mute"}>{muted ? "🔇" : "🔊"}</button>
+          </div>
 
           <motion.div className="text-center max-w-2xl mx-auto mb-10" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-foreground mb-3 text-glow-purple">🪢 Maths Tug Of War</h1>
@@ -914,6 +918,7 @@ const MathsTugOfWar = () => {
             >
               {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
             </motion.div>
+            <ThemeToggle />
             <button onClick={() => setMuted(m => !m)} className="text-lg opacity-60 hover:opacity-100 transition-opacity" title={muted ? "Unmute" : "Mute"}>
               {muted ? "🔇" : "🔊"}
             </button>
@@ -961,7 +966,7 @@ const MathsTugOfWar = () => {
               </motion.div>
             </div>
             {/* NumPad */}
-            <div className="bg-slate-900/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
+            <div className="bg-card/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
               <NumPad
                 value={leftInput}
                 onChange={setLeftInput}
@@ -972,7 +977,7 @@ const MathsTugOfWar = () => {
           </motion.div>
 
           {/* ── CENTER: Tug Of War Arena ── */}
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-3 sm:p-4 flex flex-col justify-center relative overflow-hidden min-h-[200px]">
+          <div className="rounded-2xl border border-white/10 bg-card/60 p-3 sm:p-4 flex flex-col justify-center relative overflow-hidden min-h-[200px]">
             {/* Power Pull overlay */}
             <AnimatePresence>
               {showPower && (
@@ -1187,10 +1192,10 @@ const MathsTugOfWar = () => {
               </motion.div>
             </div>
             {/* NumPad */}
-            <div className="bg-slate-900/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
+            <div className="bg-card/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
               {mode === "pvai" ? (
                 <div className="space-y-3">
-                  <div className={`w-full h-11 rounded-lg border border-red-500/30 bg-red-950/40 flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums`}>
+                  <div className={`w-full h-11 rounded-lg border border-red-500/30 bg-red-500/10 flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums`}>
                     {rightInput || <span className="text-muted-foreground/40 text-base">🤔</span>}
                   </div>
                   <div className="text-center text-muted-foreground font-display text-xs py-4 space-y-1">

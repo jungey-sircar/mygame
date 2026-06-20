@@ -1175,3 +1175,83 @@ export const TugOfWarAnim = () => {
   return <canvas ref={ref} className={CANVAS_CLASS} />;
 };
 
+// ─── Flexbox Quest ──────────────────────────────────────────────────
+export const FlexboxQuestAnim = () => {
+  const ref = useLoop((ctx, w, h, t) => {
+    // Pond background
+    const pondX = w * 0.15, pondY = h * 0.15, pondW = w * 0.7, pondH = h * 0.65;
+    ctx.fillStyle = "rgba(30,80,120,0.35)";
+    ctx.beginPath();
+    ctx.roundRect(pondX, pondY, pondW, pondH, 12);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(34,211,238,0.25)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Lily pads (targets) — stationary
+    const lilyPositions = [
+      { x: pondX + pondW * 0.25, y: pondY + pondH * 0.5 },
+      { x: pondX + pondW * 0.5, y: pondY + pondH * 0.5 },
+      { x: pondX + pondW * 0.75, y: pondY + pondH * 0.5 },
+    ];
+    lilyPositions.forEach((p) => {
+      ctx.fillStyle = "rgba(34,197,94,0.2)";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 14, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(34,197,94,0.3)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 14, 0, TAU);
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // Frogs — bounce between positions
+    const frogColors = ["rgba(74,222,128,0.9)", "rgba(250,204,21,0.9)", "rgba(248,113,113,0.9)"];
+    const phase = t * 0.8;
+    const positions = [
+      // Frogs move from left cluster toward lily pads
+      { x: pondX + pondW * (0.15 + 0.1 * Math.sin(phase)), y: pondY + pondH * (0.3 + 0.2 * Math.sin(phase * 1.3)) },
+      { x: pondX + pondW * (0.5 + 0.15 * Math.sin(phase + 2)), y: pondY + pondH * (0.5 + 0.15 * Math.cos(phase * 0.9)) },
+      { x: pondX + pondW * (0.75 + 0.1 * Math.cos(phase + 1)), y: pondY + pondH * (0.7 - 0.2 * Math.sin(phase * 1.1)) },
+    ];
+    positions.forEach((p, i) => {
+      ctx.fillStyle = frogColors[i];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, TAU);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.beginPath();
+      ctx.arc(p.x - 3, p.y - 3, 2.5, 0, TAU);
+      ctx.arc(p.x + 3, p.y - 3, 2.5, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.beginPath();
+      ctx.arc(p.x - 3, p.y - 3, 1.2, 0, TAU);
+      ctx.arc(p.x + 3, p.y - 3, 1.2, 0, TAU);
+      ctx.fill();
+    });
+
+    // Floating CSS labels
+    ctx.font = "bold 8px monospace";
+    const labels = ["justify-content", "align-items", "flex-wrap", "order"];
+    labels.forEach((label, i) => {
+      const lx = w * 0.1 + (i * w * 0.25);
+      const ly = h * 0.88 + Math.sin(t * 1.5 + i * 1.5) * 4;
+      const alpha = 0.25 + 0.15 * Math.sin(t * 2 + i);
+      ctx.fillStyle = `rgba(167,139,250,${alpha})`;
+      ctx.textAlign = "center";
+      ctx.fillText(label, lx, ly);
+    });
+
+    // "display: flex" badge
+    ctx.font = "bold 9px monospace";
+    ctx.fillStyle = "rgba(34,211,238,0.5)";
+    ctx.textAlign = "center";
+    ctx.fillText("display: flex;", w / 2, pondY + pondH + 16);
+  });
+  return <canvas ref={ref} className={CANVAS_CLASS} />;
+};

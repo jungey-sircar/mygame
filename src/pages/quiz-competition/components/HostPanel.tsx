@@ -57,7 +57,7 @@ export default function HostPanel({ state }: HostPanelProps) {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Top: Current state bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-background/80 backdrop-blur-xl flex-wrap gap-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background/80 backdrop-blur-xl flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground">Round:</span>
           <span className="text-sm font-bold text-neon-cyan">{state.rounds[state.currentRoundIndex]?.name ?? 'None'}</span>
@@ -81,7 +81,7 @@ export default function HostPanel({ state }: HostPanelProps) {
 
       {/* Host-only answer preview */}
       {state.currentQuestionIndex >= 0 && state.filteredQuestions[state.currentQuestionIndex] && (
-        <div className="px-4 py-2.5 border-b border-white/10 bg-neon-cyan/5">
+        <div className="px-4 py-2.5 border-b border-border bg-neon-cyan/5">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-1">
             <Eye size={10} /> Host Answer Preview
           </p>
@@ -91,7 +91,7 @@ export default function HostPanel({ state }: HostPanelProps) {
       )}
 
 
-      <div className="flex border-b border-white/10">
+      <div className="flex border-b border-border">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -115,7 +115,7 @@ export default function HostPanel({ state }: HostPanelProps) {
                 value={newTeamName}
                 onChange={e => setNewTeamName(e.target.value)}
                 placeholder="New team name..."
-                className="flex-1 px-3 py-2 rounded-lg bg-muted/30 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
+                className="flex-1 px-3 py-2 rounded-lg bg-muted/30 border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
                 onKeyDown={e => {
                   if (e.key === 'Enter' && newTeamName.trim()) {
                     state.addTeam(newTeamName.trim());
@@ -181,12 +181,12 @@ export default function HostPanel({ state }: HostPanelProps) {
                 value={newRoundName}
                 onChange={e => setNewRoundName(e.target.value)}
                 placeholder="Round name..."
-                className="flex-1 min-w-[150px] px-3 py-2 rounded-lg bg-muted/30 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
+                className="flex-1 min-w-[150px] px-3 py-2 rounded-lg bg-muted/30 border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
               />
               <select
                 value={newRoundType}
                 onChange={e => setNewRoundType(e.target.value as RoundType)}
-                className="px-2 py-2 rounded-lg bg-muted/30 border border-white/10 text-xs text-foreground"
+                className="px-2 py-2 rounded-lg bg-muted/30 border border-border text-xs text-foreground"
               >
                 {roundTypes.map(rt => <option key={rt} value={rt}>{rt}</option>)}
               </select>
@@ -244,7 +244,7 @@ export default function HostPanel({ state }: HostPanelProps) {
                 value={customCategory}
                 onChange={e => setCustomCategory(e.target.value)}
                 placeholder="New topic/category..."
-                className="flex-1 px-3 py-1.5 rounded-lg bg-muted/30 border border-white/10 text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
+                className="flex-1 px-3 py-1.5 rounded-lg bg-muted/30 border border-border text-xs text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-neon-cyan/50"
                 onKeyDown={e => {
                   if (e.key === 'Enter' && customCategory.trim()) {
                     setAllCategories(prev => prev.includes(customCategory.trim()) ? prev : [...prev, customCategory.trim()]);
@@ -302,7 +302,7 @@ export default function HostPanel({ state }: HostPanelProps) {
                     onChange={e => setImportJson(e.target.value)}
                     placeholder={'[\n  { "text": "Question?", "answer": "Answer", "category": "Programming", "difficulty": "easy" }\n]'}
                     rows={5}
-                    className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-white/10 text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-neon-cyan/50 font-mono resize-none"
+                    className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-border text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-neon-cyan/50 font-mono resize-none"
                   />
                 </div>
                 <Button size="sm" className="w-full text-xs" onClick={() => {
@@ -321,13 +321,13 @@ export default function HostPanel({ state }: HostPanelProps) {
 
             {showAddQuestion && (
               <div className="glass-panel p-3 space-y-2">
-                <input value={newQ.text} onChange={e => setNewQ(p => ({ ...p, text: e.target.value }))} placeholder="Question text..." className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-white/10 text-sm text-foreground outline-none" />
-                <input value={newQ.answer} onChange={e => setNewQ(p => ({ ...p, answer: e.target.value }))} placeholder="Answer..." className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-white/10 text-sm text-foreground outline-none" />
+                <input value={newQ.text} onChange={e => setNewQ(p => ({ ...p, text: e.target.value }))} placeholder="Question text..." className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-border text-sm text-foreground outline-none" />
+                <input value={newQ.answer} onChange={e => setNewQ(p => ({ ...p, answer: e.target.value }))} placeholder="Answer..." className="w-full px-3 py-2 rounded-lg bg-muted/30 border border-border text-sm text-foreground outline-none" />
                 <div className="flex gap-2">
-                  <select value={newQ.category} onChange={e => setNewQ(p => ({ ...p, category: e.target.value }))} className="flex-1 px-2 py-2 rounded-lg bg-muted/30 border border-white/10 text-xs text-foreground">
+                  <select value={newQ.category} onChange={e => setNewQ(p => ({ ...p, category: e.target.value }))} className="flex-1 px-2 py-2 rounded-lg bg-muted/30 border border-border text-xs text-foreground">
                     {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <select value={newQ.difficulty} onChange={e => setNewQ(p => ({ ...p, difficulty: e.target.value as any }))} className="px-2 py-2 rounded-lg bg-muted/30 border border-white/10 text-xs text-foreground">
+                  <select value={newQ.difficulty} onChange={e => setNewQ(p => ({ ...p, difficulty: e.target.value as any }))} className="px-2 py-2 rounded-lg bg-muted/30 border border-border text-xs text-foreground">
                     <option value="easy">Easy</option>
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
@@ -344,7 +344,7 @@ export default function HostPanel({ state }: HostPanelProps) {
                 const catQuestions = state.questions?.filter((q: any) => q.category === cat) || [];
                 const usedCount = catQuestions.filter((q: any) => q.used).length;
                 return (
-                  <div key={cat} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
+                  <div key={cat} className="flex items-center justify-between text-xs py-1 border-b border-border last:border-0">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getCategoryBadgeTone(cat)}`}>
                       {getCategoryLabel(cat)}
                     </span>
@@ -359,7 +359,7 @@ export default function HostPanel({ state }: HostPanelProps) {
               <div className="space-y-1.5">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Recently Added (this session)</p>
                 {recentlyAdded.map((q: any) => (
-                  <div key={q.id} className="p-2.5 rounded-lg border border-white/10 bg-muted/20">
+                  <div key={q.id} className="p-2.5 rounded-lg border border-border bg-muted/20">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-xs text-foreground flex-1">{q.text}</p>
                       <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-destructive" onClick={() => state.deleteQuestion(q.id)}>
@@ -416,7 +416,7 @@ export default function HostPanel({ state }: HostPanelProps) {
       </div>
 
       {/* Bottom: Reset */}
-      <div className="px-4 py-2 border-t border-white/10 flex justify-end">
+      <div className="px-4 py-2 border-t border-border flex justify-end">
         <Button size="sm" variant="destructive" className="text-xs gap-1" onClick={() => { if (confirm('Reset all quiz data?')) state.resetAll(); }}>
           <RotateCcw size={12} /> Reset All
         </Button>

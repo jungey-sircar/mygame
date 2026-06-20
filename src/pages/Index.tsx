@@ -15,7 +15,7 @@ import {
   UniverseAnim, PasswordAnim, ImposterAnim, WordBingoAnim,
   NumberBingoAnim, SpeakingAnim, FlameAnim, TicTacToeAnim,
   CodeFlowAnim, PodiumAnim, RandomNumberDuelAnim, CloudAnim, PyPlayAnim,
-  TugOfWarAnim,
+  TugOfWarAnim, FlexboxQuestAnim,
 } from "@/components/CardAnimations";
 import conan from "@/assets/conan.png";
 const HOME_SCROLL_KEY = "homepage-scroll-position";
@@ -55,6 +55,13 @@ const games = [
     description: "Host-controlled multi-team quiz system for live events.",
     to: "/quiz-competition",
     animation: <PodiumAnim />,
+  },
+  {
+    icon: "🐸",
+    title: "Flexbox Quest",
+    description: "Master CSS Flexbox by solving interactive coding puzzles.",
+    to: "/flexbox-quest",
+    animation: <FlexboxQuestAnim />,
   },
   {
     icon: "�",
@@ -318,6 +325,7 @@ const Index = () => {
       <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 py-12 sm:py-20">
         {/* Top bar */}
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 font-display text-xs">
               <LogOut className="w-3 h-3" /> Sign Out
