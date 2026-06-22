@@ -894,7 +894,8 @@ const MathsTugOfWar = () => {
   }
 
   // ─── PLAYING SCREEN ─────────────────────────────────────────────
-  // Layout inspired by mathtug.com: [Blue Question + NumPad] [Rope Arena] [Red Question + NumPad]
+  // Mobile: stacked vertically — [Question headers side-by-side] [Compact Arena] [NumPads side-by-side]
+  // Desktop: 3-column — [Blue Panel] [Arena] [Red Panel]
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
@@ -904,15 +905,15 @@ const MathsTugOfWar = () => {
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-neon-cyan/8 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 flex flex-col h-screen px-2 sm:px-4 py-3 sm:py-4 max-w-[1400px] mx-auto">
+      <div className="relative z-10 flex flex-col h-screen px-2 sm:px-4 py-2 sm:py-4 max-w-[1400px] mx-auto">
 
         {/* ─── Top Bar ─── */}
-        <div className="flex items-center justify-between mb-3 flex-shrink-0">
+        <div className="flex items-center justify-between mb-2 lg:mb-3 flex-shrink-0">
           <button onClick={playAgain} className="font-display text-sm text-muted-foreground hover:text-foreground transition-colors">← Back</button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="font-display text-xs uppercase tracking-[0.15em] text-muted-foreground hidden sm:inline">Round {round}</span>
             <motion.div
-              className={`font-display text-xl sm:text-2xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400" : timeLeft <= 30 ? "text-yellow-400" : "text-foreground"}`}
+              className={`font-display text-lg sm:text-2xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400" : timeLeft <= 30 ? "text-yellow-400" : "text-foreground"}`}
               animate={timeLeft <= 10 ? { scale: [1, 1.15, 1] } : {}}
               transition={{ duration: 0.5, repeat: Infinity }}
             >
@@ -926,25 +927,25 @@ const MathsTugOfWar = () => {
         </div>
 
         {/* ─── Score Bar ─── */}
-        <div className="grid grid-cols-3 gap-2 mb-3 flex-shrink-0">
-          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-center">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2 lg:mb-3 flex-shrink-0">
+          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-2 sm:px-3 py-1.5 sm:py-2 text-center">
             <div className="font-display text-[10px] uppercase tracking-wider text-blue-400">{leftName}</div>
-            <div className="font-display text-xl font-black text-foreground">{leftScore}</div>
+            <div className="font-display text-lg sm:text-xl font-black text-foreground">{leftScore}</div>
             {leftCombo >= 2 && <motion.div className="text-[10px] font-display text-yellow-400" initial={{ scale: 0 }} animate={{ scale: 1 }}>🔥 {leftCombo}x</motion.div>}
           </div>
-          <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-center flex flex-col items-center justify-center">
+          <div className="rounded-lg border border-white/10 bg-white/5 px-2 sm:px-3 py-1.5 sm:py-2 text-center flex flex-col items-center justify-center">
             <div className="font-display text-xs text-muted-foreground">VS</div>
             <div className="font-display text-sm font-bold text-foreground">{leftScore} - {rightScore}</div>
           </div>
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-center">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 sm:px-3 py-1.5 sm:py-2 text-center">
             <div className="font-display text-[10px] uppercase tracking-wider text-red-400">{rightName}</div>
-            <div className="font-display text-xl font-black text-foreground">{rightScore}</div>
+            <div className="font-display text-lg sm:text-xl font-black text-foreground">{rightScore}</div>
             {rightCombo >= 2 && <motion.div className="text-[10px] font-display text-yellow-400" initial={{ scale: 0 }} animate={{ scale: 1 }}>🔥 {rightCombo}x</motion.div>}
           </div>
         </div>
 
-        {/* ═══ MAIN 3-COLUMN LAYOUT: [Blue Panel] [Arena] [Red Panel] ═══ */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-3 min-h-0">
+        {/* ═══ DESKTOP: 3-COLUMN LAYOUT (lg+) ═══ */}
+        <div className="flex-1 hidden lg:grid lg:grid-cols-[1fr_1.2fr_1fr] gap-3 min-h-0">
 
           {/* ── LEFT: Blue Team Question + NumPad ── */}
           <motion.div
@@ -952,12 +953,11 @@ const MathsTugOfWar = () => {
             animate={shakeLeft ? { x: [-8, 8, -8, 8, 0] } : {}}
             transition={{ duration: 0.4 }}
           >
-            {/* Blue header with question */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-4 py-4 sm:py-5 text-center flex-shrink-0">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-4 py-5 text-center flex-shrink-0">
               <div className="font-display text-xs font-bold uppercase tracking-[0.2em] text-blue-200 mb-1">{leftName}</div>
               <motion.div
                 key={leftQuestion?.text}
-                className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight"
+                className="font-display text-4xl font-black text-white leading-tight"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
@@ -965,8 +965,7 @@ const MathsTugOfWar = () => {
                 {leftQuestion?.text}
               </motion.div>
             </div>
-            {/* NumPad */}
-            <div className="bg-card/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
+            <div className="bg-card/80 p-4 flex-1 flex flex-col justify-center">
               <NumPad
                 value={leftInput}
                 onChange={setLeftInput}
@@ -977,76 +976,54 @@ const MathsTugOfWar = () => {
           </motion.div>
 
           {/* ── CENTER: Tug Of War Arena ── */}
-          <div className="rounded-2xl border border-white/10 bg-card/60 p-3 sm:p-4 flex flex-col justify-center relative overflow-hidden min-h-[200px]">
-            {/* Power Pull overlay */}
+          <div className="rounded-2xl border border-white/10 bg-card/60 p-4 flex flex-col justify-center relative overflow-hidden min-h-[200px]">
             <AnimatePresence>
               {showPower && (
                 <motion.div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
                   initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.5 }}>
-                  <div className={`font-display text-xl sm:text-2xl font-black ${showPower === "left" ? "text-blue-400" : "text-red-400"} drop-shadow-[0_0_20px_rgba(147,51,234,0.5)]`}>
+                  <div className={`font-display text-2xl font-black ${showPower === "left" ? "text-blue-400" : "text-red-400"} drop-shadow-[0_0_20px_rgba(147,51,234,0.5)]`}>
                     {leftCombo >= COMBO_MEGA || rightCombo >= COMBO_MEGA ? "⚡ MEGA PULL! ⚡" : "💪 POWER PULL! 💪"}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Arena area */}
             <div className="flex-1 flex flex-col items-center justify-center relative">
-              {/* Zone labels */}
               <div className="w-full flex justify-between mb-2 px-2">
                 <span className="font-display text-[10px] font-bold text-blue-400 uppercase tracking-wider">{leftName}</span>
                 <span className="font-display text-[10px] font-bold text-red-400 uppercase tracking-wider">{rightName}</span>
               </div>
 
-              {/* Main rope area */}
               <div className="w-full relative" style={{ height: "180px" }}>
-                {/* Blue team — 2 characters pulling left */}
                 <motion.div
                   className="absolute left-[0%] bottom-[10%] z-20 flex items-end gap-[-8px]"
                   animate={{ x: ropePos * 0.7 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                  <motion.div
-                    animate={{ rotate: [0, -4, 0], y: [0, -2, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
+                  <motion.div animate={{ rotate: [0, -4, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
                     <TugPerson color="blue" scale={1.3} />
                   </motion.div>
-                  <motion.div
-                    className="-ml-3"
-                    animate={{ rotate: [0, -3, 0], y: [0, -2, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
+                  <motion.div className="-ml-3" animate={{ rotate: [0, -3, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
                     <TugPerson color="blue" scale={1.15} />
                   </motion.div>
                 </motion.div>
 
-                {/* Red team — 2 characters pulling right */}
                 <motion.div
                   className="absolute right-[0%] bottom-[10%] z-20 flex items-end gap-[-8px]"
                   animate={{ x: ropePos * 0.7 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                  <motion.div
-                    className="-mr-3"
-                    animate={{ rotate: [0, 3, 0], y: [0, -2, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
+                  <motion.div className="-mr-3" animate={{ rotate: [0, 3, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
                     <TugPerson color="red" flip scale={1.15} />
                   </motion.div>
-                  <motion.div
-                    animate={{ rotate: [0, 4, 0], y: [0, -2, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
+                  <motion.div animate={{ rotate: [0, 4, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
                     <TugPerson color="red" flip scale={1.3} />
                   </motion.div>
                 </motion.div>
 
-                {/* ═══ ROPE — thick realistic braided rope ═══ */}
-                {/* Main rope body — positioned at hand height */}
                 <motion.div
                   className="absolute z-15 pointer-events-none"
-                  style={{
-                    left: "-5%", right: "-5%",
-                    bottom: "46%",
-                    height: "8px",
-                    borderRadius: "4px",
+                  style={{ left: "-5%", right: "-5%", bottom: "46%", height: "8px", borderRadius: "4px",
                     background: "linear-gradient(180deg, #C9A96E 0%, #A0845C 30%, #8B7355 60%, #6B5B3E 100%)",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
                     backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(107,91,62,0.4) 8px, rgba(107,91,62,0.4) 10px)`,
@@ -1054,113 +1031,61 @@ const MathsTugOfWar = () => {
                   animate={{ x: ropePos * 1.2 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
-                {/* Rope highlight stripe */}
                 <motion.div
                   className="absolute z-15 pointer-events-none"
-                  style={{
-                    left: "-5%", right: "-5%",
-                    bottom: "48.5%",
-                    height: "2px",
-                    borderRadius: "1px",
-                    background: "rgba(201,169,110,0.35)",
-                  }}
+                  style={{ left: "-5%", right: "-5%", bottom: "48.5%", height: "2px", borderRadius: "1px", background: "rgba(201,169,110,0.35)" }}
                   animate={{ x: ropePos * 1.2 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
 
-                {/* Left trailing rope end — droops down behind blue team */}
-                <motion.svg
-                  className="absolute left-[-8%] bottom-[20%] z-14 pointer-events-none"
-                  width="80" height="80" viewBox="0 0 80 80" fill="none"
-                  animate={{ x: ropePos * 1.2 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  <path d="M80 20 Q60 20 45 28 Q30 38 20 52 Q14 62 18 68"
-                    stroke="#8B7355" strokeWidth="6" strokeLinecap="round" fill="none" />
-                  <path d="M80 19 Q60 19 45 27"
-                    stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3" />
+                <motion.svg className="absolute left-[-8%] bottom-[20%] z-14 pointer-events-none" width="80" height="80" viewBox="0 0 80 80" fill="none"
+                  animate={{ x: ropePos * 1.2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+                  <path d="M80 20 Q60 20 45 28 Q30 38 20 52 Q14 62 18 68" stroke="#8B7355" strokeWidth="6" strokeLinecap="round" fill="none" />
+                  <path d="M80 19 Q60 19 45 27" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3" />
+                </motion.svg>
+                <motion.svg className="absolute right-[-8%] bottom-[20%] z-14 pointer-events-none" width="80" height="80" viewBox="0 0 80 80" fill="none"
+                  style={{ transform: "scaleX(-1)" }} animate={{ x: ropePos * 1.2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+                  <path d="M80 20 Q60 20 45 28 Q30 38 20 52 Q14 62 18 68" stroke="#8B7355" strokeWidth="6" strokeLinecap="round" fill="none" />
+                  <path d="M80 19 Q60 19 45 27" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3" />
                 </motion.svg>
 
-                {/* Right trailing rope end — droops down behind red team */}
-                <motion.svg
-                  className="absolute right-[-8%] bottom-[20%] z-14 pointer-events-none"
-                  width="80" height="80" viewBox="0 0 80 80" fill="none"
-                  style={{ transform: "scaleX(-1)" }}
-                  animate={{ x: ropePos * 1.2 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  <path d="M80 20 Q60 20 45 28 Q30 38 20 52 Q14 62 18 68"
-                    stroke="#8B7355" strokeWidth="6" strokeLinecap="round" fill="none" />
-                  <path d="M80 19 Q60 19 45 27"
-                    stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.3" />
-                </motion.svg>
-
-                {/* ═══ HANDKERCHIEF at center of rope ═══ */}
-                <motion.div
-                  className="absolute z-30 pointer-events-none"
-                  style={{ left: "50%", bottom: "36%" }}
-                  animate={{ x: ropePos * 1.2 - 16 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  <motion.svg
-                    width="32" height="45" viewBox="0 0 32 45" fill="none"
-                    animate={{ rotate: [0, 4, -4, 0] }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    {/* Knot tied on rope */}
+                <motion.div className="absolute z-30 pointer-events-none" style={{ left: "50%", bottom: "36%" }}
+                  animate={{ x: ropePos * 1.2 - 16 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+                  <motion.svg width="32" height="45" viewBox="0 0 32 45" fill="none"
+                    animate={{ rotate: [0, 4, -4, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}>
                     <ellipse cx="16" cy="5" rx="7" ry="5" fill="#DC2626" />
                     <ellipse cx="16" cy="5" rx="5" ry="3" fill="#EF4444" />
-                    {/* Fabric draping down */}
                     <path d="M9 8 L23 8 L25 20 L21 32 L16 40 L11 32 L7 20 Z" fill="#DC2626" />
                     <path d="M13 10 L19 10 L20 18 L16 26 L12 18 Z" fill="#EF4444" opacity="0.45" />
-                    {/* White stripe */}
                     <path d="M10 16 L22 16 L21 21 L11 21 Z" fill="white" opacity="0.65" />
-                    {/* Tip shadow */}
                     <path d="M13 34 L16 40 L19 34" fill="#B91C1C" />
                   </motion.svg>
                 </motion.div>
 
-                {/* Center divider line */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-[10%] bottom-[10%] w-[2px] bg-yellow-400/30 z-5 rounded-full" />
-
-                {/* Ground dust particles */}
                 {[...Array(8)].map((_, i) => (
-                  <motion.div key={i}
-                    className="absolute bottom-[15%] w-1.5 h-1.5 rounded-full bg-white/10"
-                    style={{ left: `${8 + i * 11}%` }}
+                  <motion.div key={i} className="absolute bottom-[15%] w-1.5 h-1.5 rounded-full bg-white/10" style={{ left: `${8 + i * 11}%` }}
                     animate={{ y: [0, -12, 0], opacity: [0.15, 0, 0.15], x: ropePos * 0.3 }}
-                    transition={{ duration: 0.8, delay: i * 0.1, repeat: Infinity }}
-                  />
+                    transition={{ duration: 0.8, delay: i * 0.1, repeat: Infinity }} />
                 ))}
-
-                {/* Finish indicators */}
                 <div className="absolute left-[1%] top-[15%] bottom-[15%] w-[3px] bg-blue-500/50 rounded-full" />
                 <div className="absolute right-[1%] top-[15%] bottom-[15%] w-[3px] bg-red-500/50 rounded-full" />
               </div>
 
-              {/* Progress bar */}
               <div className="w-full mt-3 relative h-2 bg-white/5 rounded-full overflow-hidden">
                 <motion.div className="absolute top-0 bottom-0 rounded-full"
                   style={{ background: ropePos < 0 ? "linear-gradient(90deg, rgba(52,152,219,0.8), rgba(52,152,219,0.3))" : ropePos > 0 ? "linear-gradient(90deg, rgba(231,76,60,0.3), rgba(231,76,60,0.8))" : "linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.2))" }}
                   animate={{ left: ropePos < 0 ? `${ropePercent}%` : "50%", right: ropePos > 0 ? `${100 - ropePercent}%` : "50%" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                />
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }} />
                 <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-white/30" />
               </div>
 
-              {/* Classroom mode indicator */}
               {mode === "classroom" && (
                 <div className="mt-2 flex gap-2 justify-center">
-                  <span className="font-display text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
-                    Team A · Active
-                  </span>
-                  <span className="font-display text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">
-                    Team B · Active
-                  </span>
+                  <span className="font-display text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Team A · Active</span>
+                  <span className="font-display text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">Team B · Active</span>
                 </div>
               )}
-
-              {/* Mode info */}
               <div className="mt-2 flex gap-2 justify-center">
                 <span className="px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-display text-muted-foreground uppercase tracking-wider">{difficulty}</span>
                 <span className="px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-display text-muted-foreground uppercase tracking-wider">
@@ -1170,20 +1095,19 @@ const MathsTugOfWar = () => {
             </div>
           </div>
 
-          {/* ── RIGHT: Red Team Question + NumPad ── */}
+          {/* ── RIGHT: Red Team Question + NumPad (desktop) ── */}
           <motion.div
             className="rounded-2xl border-2 border-red-500/40 overflow-hidden flex flex-col"
             animate={shakeRight ? { x: [-8, 8, -8, 8, 0] } : {}}
             transition={{ duration: 0.4 }}
           >
-            {/* Red header with question */}
-            <div className="bg-gradient-to-br from-red-600 to-red-700 px-4 py-4 sm:py-5 text-center flex-shrink-0">
+            <div className="bg-gradient-to-br from-red-600 to-red-700 px-4 py-5 text-center flex-shrink-0">
               <div className="font-display text-xs font-bold uppercase tracking-[0.2em] text-red-200 mb-1">
                 {rightName} {mode === "pvai" && "🤖"}
               </div>
               <motion.div
                 key={rightQuestion?.text}
-                className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight"
+                className="font-display text-4xl font-black text-white leading-tight"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
@@ -1191,41 +1115,200 @@ const MathsTugOfWar = () => {
                 {rightQuestion?.text}
               </motion.div>
             </div>
-            {/* NumPad */}
-            <div className="bg-card/80 p-3 sm:p-4 flex-1 flex flex-col justify-center">
+            <div className="bg-card/80 p-4 flex-1 flex flex-col justify-center">
               {mode === "pvai" ? (
                 <div className="space-y-3">
-                  <div className={`w-full h-11 rounded-lg border border-red-500/30 bg-red-500/10 flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums`}>
+                  <div className="w-full h-11 rounded-lg border border-red-500/30 bg-red-500/10 flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums">
                     {rightInput || <span className="text-muted-foreground/40 text-base">🤔</span>}
                   </div>
                   <div className="text-center text-muted-foreground font-display text-xs py-4 space-y-1">
-                    <motion.div
-                      animate={{ opacity: [0.4, 1, 0.4] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      AI is thinking...
-                    </motion.div>
+                    <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }}>AI is thinking...</motion.div>
                     <div className="text-[10px] text-muted-foreground/50">Difficulty: {aiDifficulty}</div>
                   </div>
                 </div>
               ) : mode === "classroom" ? (
-                <NumPad
-                  value={rightInput}
-                  onChange={setRightInput}
-                  onSubmit={() => handleAnswer("right", rightInput)}
-                  color="red"
+                <NumPad value={rightInput} onChange={setRightInput} onSubmit={() => handleAnswer("right", rightInput)} color="red" />
+              ) : (
+                <NumPad value={rightInput} onChange={setRightInput} onSubmit={() => handleAnswer("right", rightInput)}
+                  disabled={mode === "pvai" || (mode === "classroom" && classroomTurn !== "right")} color="red" />
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ═══ MOBILE LAYOUT (< lg): Vertical stacked ═══ */}
+        <div className="flex-1 flex flex-col gap-2 min-h-0 lg:hidden overflow-auto">
+
+          {/* ── Question Panels: Side by Side ── */}
+          <div className="grid grid-cols-2 gap-2 flex-shrink-0">
+            {/* Blue question */}
+            <motion.div
+              className="rounded-xl border-2 border-blue-500/40 overflow-hidden"
+              animate={shakeLeft ? { x: [-6, 6, -6, 6, 0] } : {}}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-3 py-3 text-center">
+                <div className="font-display text-[10px] font-bold uppercase tracking-[0.15em] text-blue-200 mb-0.5">{leftName}</div>
+                <motion.div
+                  key={leftQuestion?.text}
+                  className="font-display text-xl sm:text-2xl font-black text-white leading-tight"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {leftQuestion?.text}
+                </motion.div>
+              </div>
+            </motion.div>
+            {/* Red question */}
+            <motion.div
+              className="rounded-xl border-2 border-red-500/40 overflow-hidden"
+              animate={shakeRight ? { x: [-6, 6, -6, 6, 0] } : {}}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="bg-gradient-to-br from-red-600 to-red-700 px-3 py-3 text-center">
+                <div className="font-display text-[10px] font-bold uppercase tracking-[0.15em] text-red-200 mb-0.5">
+                  {rightName} {mode === "pvai" && "🤖"}
+                </div>
+                <motion.div
+                  key={rightQuestion?.text}
+                  className="font-display text-xl sm:text-2xl font-black text-white leading-tight"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {rightQuestion?.text}
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ── Compact Arena ── */}
+          <div className="rounded-xl border border-white/10 bg-card/60 px-2 py-2 flex flex-col justify-center relative overflow-hidden flex-shrink-0">
+            <AnimatePresence>
+              {showPower && (
+                <motion.div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+                  initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.5 }}>
+                  <div className={`font-display text-lg font-black ${showPower === "left" ? "text-blue-400" : "text-red-400"} drop-shadow-[0_0_20px_rgba(147,51,234,0.5)]`}>
+                    {leftCombo >= COMBO_MEGA || rightCombo >= COMBO_MEGA ? "⚡ MEGA PULL! ⚡" : "💪 POWER PULL! 💪"}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex flex-col items-center justify-center relative">
+              <div className="w-full flex justify-between px-2">
+                <span className="font-display text-[9px] font-bold text-blue-400 uppercase tracking-wider">{leftName}</span>
+                <span className="font-display text-[9px] font-bold text-red-400 uppercase tracking-wider">{rightName}</span>
+              </div>
+
+              {/* Compact rope area */}
+              <div className="w-full relative" style={{ height: "120px" }}>
+                <motion.div
+                  className="absolute left-[0%] bottom-[10%] z-20 flex items-end"
+                  animate={{ x: ropePos * 0.5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <motion.div animate={{ rotate: [0, -4, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
+                    <TugPerson color="blue" scale={0.9} />
+                  </motion.div>
+                  <motion.div className="-ml-2" animate={{ rotate: [0, -3, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
+                    <TugPerson color="blue" scale={0.8} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.div
+                  className="absolute right-[0%] bottom-[10%] z-20 flex items-end"
+                  animate={{ x: ropePos * 0.5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <motion.div className="-mr-2" animate={{ rotate: [0, 3, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.12 }}>
+                    <TugPerson color="red" flip scale={0.8} />
+                  </motion.div>
+                  <motion.div animate={{ rotate: [0, 4, 0], y: [0, -2, 0] }} transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}>
+                    <TugPerson color="red" flip scale={0.9} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.div className="absolute z-15 pointer-events-none"
+                  style={{ left: "-5%", right: "-5%", bottom: "46%", height: "6px", borderRadius: "3px",
+                    background: "linear-gradient(180deg, #C9A96E 0%, #A0845C 30%, #8B7355 60%, #6B5B3E 100%)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                    backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(107,91,62,0.4) 8px, rgba(107,91,62,0.4) 10px)`,
+                  }}
+                  animate={{ x: ropePos * 0.8 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
+
+                <motion.div className="absolute z-30 pointer-events-none" style={{ left: "50%", bottom: "32%" }}
+                  animate={{ x: ropePos * 0.8 - 12 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+                  <motion.svg width="24" height="34" viewBox="0 0 32 45" fill="none"
+                    animate={{ rotate: [0, 4, -4, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}>
+                    <ellipse cx="16" cy="5" rx="7" ry="5" fill="#DC2626" />
+                    <ellipse cx="16" cy="5" rx="5" ry="3" fill="#EF4444" />
+                    <path d="M9 8 L23 8 L25 20 L21 32 L16 40 L11 32 L7 20 Z" fill="#DC2626" />
+                    <path d="M10 16 L22 16 L21 21 L11 21 Z" fill="white" opacity="0.65" />
+                    <path d="M13 34 L16 40 L19 34" fill="#B91C1C" />
+                  </motion.svg>
+                </motion.div>
+
+                <div className="absolute left-1/2 -translate-x-1/2 top-[10%] bottom-[10%] w-[2px] bg-yellow-400/30 z-5 rounded-full" />
+                <div className="absolute left-[1%] top-[15%] bottom-[15%] w-[2px] bg-blue-500/50 rounded-full" />
+                <div className="absolute right-[1%] top-[15%] bottom-[15%] w-[2px] bg-red-500/50 rounded-full" />
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full mt-1 relative h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <motion.div className="absolute top-0 bottom-0 rounded-full"
+                  style={{ background: ropePos < 0 ? "linear-gradient(90deg, rgba(52,152,219,0.8), rgba(52,152,219,0.3))" : ropePos > 0 ? "linear-gradient(90deg, rgba(231,76,60,0.3), rgba(231,76,60,0.8))" : "linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.2))" }}
+                  animate={{ left: ropePos < 0 ? `${ropePercent}%` : "50%", right: ropePos > 0 ? `${100 - ropePercent}%` : "50%" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }} />
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-white/30" />
+              </div>
+
+              <div className="mt-1 flex gap-1.5 justify-center">
+                <span className="px-1.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-[9px] font-display text-muted-foreground uppercase tracking-wider">{difficulty}</span>
+                <span className="px-1.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-[9px] font-display text-muted-foreground uppercase tracking-wider">
+                  {mode === "pvp" ? "PvP" : mode === "pvai" ? `AI ${aiDifficulty}` : "Classroom"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── NumPads: Side by Side ── */}
+          <div className="grid grid-cols-2 gap-2 flex-1 min-h-0">
+            {/* Blue numpad */}
+            <div className="rounded-xl border border-blue-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto">
+              <NumPad
+                value={leftInput}
+                onChange={setLeftInput}
+                onSubmit={() => handleAnswer("left", leftInput)}
+                color="blue"
+              />
+            </div>
+            {/* Red numpad / AI display */}
+            <div className="rounded-xl border border-red-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto">
+              {mode === "pvai" ? (
+                <div className="space-y-2">
+                  <div className="w-full h-9 rounded-lg border border-red-500/30 bg-red-500/10 flex items-center justify-center px-2 font-display text-lg font-bold text-foreground tabular-nums">
+                    {rightInput || <span className="text-muted-foreground/40 text-sm">🤔</span>}
+                  </div>
+                  <div className="text-center text-muted-foreground font-display text-[10px] py-2 space-y-0.5">
+                    <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }}>AI is thinking...</motion.div>
+                    <div className="text-[9px] text-muted-foreground/50">Difficulty: {aiDifficulty}</div>
+                  </div>
+                </div>
               ) : (
                 <NumPad
                   value={rightInput}
                   onChange={setRightInput}
                   onSubmit={() => handleAnswer("right", rightInput)}
-                  disabled={mode === "pvai" || (mode === "classroom" && classroomTurn !== "right")}
+                  disabled={mode === "classroom" && classroomTurn !== "right"}
                   color="red"
                 />
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
