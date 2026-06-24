@@ -334,54 +334,91 @@ interface NumPadProps {
 }
 
 const NumPad = ({ value, onChange, onSubmit, disabled, color }: NumPadProps) => {
-  const accent = color === "blue" ? "bg-blue-600 hover:bg-blue-500" : "bg-red-600 hover:bg-red-500";
-  const clearColor = color === "blue" ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 hover:bg-blue-500/30" : "bg-red-500/20 text-red-600 dark:text-red-300 hover:bg-red-500/30";
+  const accent = color === "blue" ? "bg-blue-600 hover:bg-blue-500 active:bg-blue-400" : "bg-red-600 hover:bg-red-500 active:bg-red-400";
+  const clearColor = color === "blue" ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 hover:bg-blue-500/30 active:bg-blue-500/40" : "bg-red-500/20 text-red-600 dark:text-red-300 hover:bg-red-500/30 active:bg-red-500/40";
   const btnBase = "rounded-lg font-display font-bold text-foreground transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed select-none";
 
-  const press = (digit: string) => {
+  // Use onPointerDown for instant touch + mouse response.
+  // preventDefault stops the browser from queuing a delayed click or triggering
+  // scroll/zoom, which is critical for simultaneous multi-touch on two keypads.
+  const press = useCallback((digit: string) => {
     if (disabled) return;
     onChange(value + digit);
-  };
+  }, [disabled, onChange, value]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent, action: () => void) => {
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+  }, []);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" style={{ touchAction: "none" }}>
       {/* Display */}
       <div className={`w-full h-11 rounded-lg border ${
         color === "blue" ? "border-blue-500/30 bg-blue-500/10" : "border-red-500/30 bg-red-500/10"
-      } flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums min-h-[44px]`}>
+      } flex items-center justify-center px-3 font-display text-xl font-bold text-foreground tabular-nums min-h-[44px]`}
+        style={{ touchAction: "none" }}
+      >
         {value || <span className="text-muted-foreground/40 text-base">?</span>}
       </div>
 
-      {/* Number grid */}
-      <div className="grid grid-cols-3 gap-1.5">
+      {/* Number grid — touch-action: none allows simultaneous taps on two keypads */}
+      <div className="grid grid-cols-4 gap-1.5" style={{ touchAction: "none" }}>
         {[1,2,3,4,5,6,7,8,9].map(n => (
           <button
             key={n}
-            onClick={() => press(String(n))}
+            onPointerDown={(e) => handlePointerDown(e, () => press(String(n)))}
+            onClick={(e) => e.preventDefault()}
             disabled={disabled}
-            className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 text-base sm:text-lg`}
+            className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 active:bg-muted/50 text-base sm:text-lg`}
+            style={{ touchAction: "none" }}
           >
             {n}
           </button>
         ))}
+        {/* Negative toggle */}
         <button
-          onClick={() => { if (!disabled) onChange(""); }}
+          onPointerDown={(e) => handlePointerDown(e, () => {
+            if (!disabled) {
+              if (value.startsWith("-")) {
+                onChange(value.slice(1));
+              } else {
+                onChange("-" + value);
+              }
+            }
+          })}
+          onClick={(e) => e.preventDefault()}
           disabled={disabled}
-          className={`${btnBase} h-10 sm:h-11 ${clearColor} text-xs sm:text-sm tracking-wider`}
+          className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 active:bg-muted/50 text-base sm:text-lg`}
+          style={{ touchAction: "none" }}
         >
-          C
+          ±
         </button>
         <button
-          onClick={() => press("0")}
+          onPointerDown={(e) => handlePointerDown(e, () => press("0"))}
+          onClick={(e) => e.preventDefault()}
           disabled={disabled}
-          className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 text-base sm:text-lg`}
+          className={`${btnBase} h-10 sm:h-11 bg-muted hover:bg-muted/70 active:bg-muted/50 text-base sm:text-lg`}
+          style={{ touchAction: "none" }}
         >
           0
         </button>
         <button
-          onClick={onSubmit}
+          onPointerDown={(e) => handlePointerDown(e, () => { if (!disabled) onChange(""); })}
+          onClick={(e) => e.preventDefault()}
+          disabled={disabled}
+          className={`${btnBase} h-10 sm:h-11 ${clearColor} text-xs sm:text-sm tracking-wider`}
+          style={{ touchAction: "none" }}
+        >
+          C
+        </button>
+        <button
+          onPointerDown={(e) => handlePointerDown(e, () => { if (!disabled) onSubmit(); })}
+          onClick={(e) => e.preventDefault()}
           disabled={disabled}
           className={`${btnBase} h-10 sm:h-11 ${accent} text-white text-xs sm:text-sm tracking-wider`}
+          style={{ touchAction: "none" }}
         >
           OK
         </button>
@@ -897,7 +934,7 @@ const MathsTugOfWar = () => {
   // Mobile: stacked vertically — [Question headers side-by-side] [Compact Arena] [NumPads side-by-side]
   // Desktop: 3-column — [Blue Panel] [Arena] [Red Panel]
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ touchAction: "manipulation" }}>
       <ParticleBackground />
       {showConfetti && <Confetti />}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -905,7 +942,7 @@ const MathsTugOfWar = () => {
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-neon-cyan/8 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 flex flex-col h-screen px-2 sm:px-4 py-2 sm:py-4 max-w-[1400px] mx-auto">
+      <div className="relative z-10 flex flex-col h-screen px-2 sm:px-4 py-2 sm:py-4 max-w-[1400px] mx-auto" style={{ touchAction: "manipulation" }}>
 
         {/* ─── Top Bar ─── */}
         <div className="flex items-center justify-between mb-2 lg:mb-3 flex-shrink-0">
@@ -1137,7 +1174,7 @@ const MathsTugOfWar = () => {
         </div>
 
         {/* ═══ MOBILE LAYOUT (< lg): Vertical stacked ═══ */}
-        <div className="flex-1 flex flex-col gap-2 min-h-0 lg:hidden overflow-auto">
+        <div className="flex-1 flex flex-col gap-2 min-h-0 lg:hidden overflow-auto" style={{ touchAction: "none" }}>
 
           {/* ── Question Panels: Side by Side ── */}
           <div className="grid grid-cols-2 gap-2 flex-shrink-0">
@@ -1276,9 +1313,9 @@ const MathsTugOfWar = () => {
           </div>
 
           {/* ── NumPads: Side by Side ── */}
-          <div className="grid grid-cols-2 gap-2 flex-1 min-h-0">
+          <div className="grid grid-cols-2 gap-2 flex-1 min-h-0" style={{ touchAction: "none" }}>
             {/* Blue numpad */}
-            <div className="rounded-xl border border-blue-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto">
+            <div className="rounded-xl border border-blue-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto" style={{ touchAction: "none" }}>
               <NumPad
                 value={leftInput}
                 onChange={setLeftInput}
@@ -1287,7 +1324,7 @@ const MathsTugOfWar = () => {
               />
             </div>
             {/* Red numpad / AI display */}
-            <div className="rounded-xl border border-red-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto">
+            <div className="rounded-xl border border-red-500/30 bg-card/80 p-2 flex flex-col justify-center overflow-auto" style={{ touchAction: "none" }}>
               {mode === "pvai" ? (
                 <div className="space-y-2">
                   <div className="w-full h-9 rounded-lg border border-red-500/30 bg-red-500/10 flex items-center justify-center px-2 font-display text-lg font-bold text-foreground tabular-nums">
